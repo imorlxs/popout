@@ -169,18 +169,18 @@ class TestPopMove:
         """Test that pop removes the bottom piece."""
         board = Board()
         board.drop(0, PLAYER1)
-        board.pop(0, PLAYER1)
+        assert board.pop(0, PLAYER1) is True
         assert board.board[ROWS - 1][0] == EMPTY
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_shifts_pieces_down(self):
         """Test that pop shifts pieces down."""
         board = Board()
-        board.drop(0, PLAYER1)
-        board.drop(0, PLAYER2)
-        board.drop(0, PLAYER1)
+        assert board.drop(0, PLAYER1) is True
+        assert board.drop(0, PLAYER2) is True
+        assert board.drop(0, PLAYER1) is True
         
-        board.pop(0, PLAYER1)
+        assert board.pop(0, PLAYER1) is True
         
         # After popping bottom PLAYER1, PLAYER2 should be at bottom
         assert board.board[ROWS - 1][0] == PLAYER2
@@ -192,8 +192,8 @@ class TestPopMove:
         """Test pop returns False with wrong player."""
         board = Board()
         board.drop(0, PLAYER1)
-        result = board.pop(0, PLAYER2)
-        assert result is False
+        assert board.pop(0, PLAYER2) is False
+        assert board.board[ROWS - 1][0] == PLAYER1
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_empty_column_returns_false(self):
@@ -223,28 +223,28 @@ class TestWinDetection:
     def test_check_line_four_in_row(self):
         """Test _check_line detects four in a row."""
         board = Board()
-        line = [PLAYER1, PLAYER1, PLAYER1, PLAYER1]
+        line = [PLAYER1, PLAYER1, PLAYER1, PLAYER1, EMPTY, EMPTY, EMPTY]
         assert board._check_line(line) == PLAYER1
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_player2_wins(self):
         """Test _check_line detects player 2 win."""
         board = Board()
-        line = [EMPTY, PLAYER2, PLAYER2, PLAYER2, PLAYER2, EMPTY]
+        line = [EMPTY, PLAYER2, PLAYER2, PLAYER2, PLAYER2, EMPTY, EMPTY]
         assert board._check_line(line) == PLAYER2
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_no_winner(self):
         """Test _check_line returns 0 for no winner."""
         board = Board()
-        line = [PLAYER1, PLAYER2, PLAYER1, PLAYER2]
+        line = [EMPTY, EMPTY, PLAYER1, PLAYER2, PLAYER1, PLAYER2, EMPTY]
         assert board._check_line(line) == 0
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_three_in_row(self):
         """Test _check_line doesn't count three in a row."""
         board = Board()
-        line = [PLAYER1, PLAYER1, PLAYER1, PLAYER2]
+        line = [EMPTY, EMPTY, PLAYER1, PLAYER1, PLAYER1, PLAYER2, EMPTY]
         assert board._check_line(line) == 0
 
     @pytest.mark.xfail(raises=NotImplementedError)
