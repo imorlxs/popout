@@ -274,21 +274,26 @@ class TestWinDetection:
     def test_diagonal_win_ascending(self):
         """Test detecting diagonal win (ascending)."""
         board = Board()
-        # Build diagonal: (5,0), (4,1), (3,2), (2,3)
-        # This requires careful setup
-        board.drop(1, PLAYER2)
-        board.drop(1, PLAYER2)
-        board.drop(1, PLAYER2)
-        board.drop(1, PLAYER1)  # Now at (2,1)
+
+        #   - - - - - - -
+        #   - - - - - - -
+        #   - - - - X - -
+        #   - - - X O - -
+        #   - - X O O - -
+        #   - X O O O - -
+        board.drop(1, PLAYER1)
         
         board.drop(2, PLAYER2)
-        board.drop(2, PLAYER2)
-        board.drop(2, PLAYER1)  # Now at (3,2)
+        board.drop(2, PLAYER1) 
         
         board.drop(3, PLAYER2)
-        board.drop(3, PLAYER1)  # Now at (4,3)
+        board.drop(3, PLAYER2)
+        board.drop(3, PLAYER1) 
         
-        board.drop(0, PLAYER1)  # Now at (5,0)
+        board.drop(4, PLAYER2)
+        board.drop(4, PLAYER2)
+        board.drop(4, PLAYER2)
+        board.drop(4, PLAYER1) 
         
         assert board.get_winner() == PLAYER1
 
@@ -296,19 +301,27 @@ class TestWinDetection:
     def test_diagonal_win_descending(self):
         """Test detecting diagonal win (descending)."""
         board = Board()
-        # Build diagonal: (2,0), (3,1), (4,2), (5,3)
-        board.drop(0, PLAYER1)
-        board.drop(0, PLAYER1)
-        board.drop(0, PLAYER1)  # Now at (2,0)
-        
-        board.drop(1, PLAYER2)
-        board.drop(1, PLAYER2)
-        board.drop(1, PLAYER1)  # Now at (3,1)
-        
+        #   - - - - - - -
+        #   - - - - - - -
+        #   - - X - - - -
+        #   - - O X - - -
+        #   - - O O X - -
+        #   - - O O O X -
+
         board.drop(2, PLAYER2)
-        board.drop(2, PLAYER1)  # Now at (4,2)
+        board.drop(2, PLAYER2)
+        board.drop(2, PLAYER2)
+        board.drop(2, PLAYER1)
+        board.drop(2, PLAYER1)
         
-        board.drop(3, PLAYER1)  # Now at (5,3)
+        board.drop(3, PLAYER2)
+        board.drop(3, PLAYER2)
+        board.drop(3, PLAYER1) 
+
+        board.drop(4, PLAYER2)
+        board.drop(4, PLAYER1) 
+        
+        board.drop(5, PLAYER1)
         
         assert board.get_winner() == PLAYER1
 
