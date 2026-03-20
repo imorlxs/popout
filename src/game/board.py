@@ -11,7 +11,7 @@ COLS = 7
 EMPTY = 0
 PLAYER1 = 1
 PLAYER2 = 2
-SYMBOLS = {EMPTY: '-', PLAYER1: 'X', PLAYER2: 'O'}
+SYMBOLS = {EMPTY: "-", PLAYER1: "X", PLAYER2: "O"}
 
 
 class Board:
@@ -19,7 +19,7 @@ class Board:
 
     def __init__(self):
         raise NotImplementedError("Board logic is not implemented yet.")
-    
+
     def copy(self):
         raise NotImplementedError("Board logic is not implemented yet.")
 
@@ -72,7 +72,7 @@ class Board:
     def is_full(self) -> bool:
         """Return True if every cell on the board is occupied."""
         raise NotImplementedError("Board logic is not implemented yet.")
-    
+
     # ------------------------------------------------------------------
     # Possible moves
     # ------------------------------------------------------------------

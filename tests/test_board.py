@@ -38,16 +38,17 @@ class TestBoardInitialization:
 
 class TestBoardCopy:
     """Tests for Board.copy() method."""
+
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_copy_creates_independent_board(self):
         """Test that copy creates an independent board instance."""
         board1 = Board()
         board1.drop(0, PLAYER1)
         board2 = board1.copy()
-        
+
         # Modify board2
         board2.drop(1, PLAYER2)
-        
+
         # board1 should be unchanged
         assert board1.board[ROWS - 1][0] == PLAYER1
         assert board1.board[ROWS - 1][1] == EMPTY
@@ -59,9 +60,9 @@ class TestBoardCopy:
         board1.drop(0, PLAYER1)
         board1.drop(0, PLAYER2)
         board1.drop(1, PLAYER1)
-        
+
         board2 = board1.copy()
-        
+
         assert board2.board == board1.board
         assert board2 is not board1  # Should be different objects
 
@@ -90,7 +91,7 @@ class TestDropMove:
         board = Board()
         board.drop(0, PLAYER1)
         board.drop(0, PLAYER2)
-        
+
         assert board.board[ROWS - 1][0] == PLAYER1
         assert board.board[ROWS - 2][0] == PLAYER2
 
@@ -110,7 +111,7 @@ class TestDropMove:
         # Fill column 0
         for i in range(ROWS):
             board.drop(0, PLAYER1)
-        
+
         assert board.can_drop(0) is False
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -120,7 +121,7 @@ class TestDropMove:
         # Fill column 0
         for i in range(ROWS):
             board.drop(0, PLAYER1)
-        
+
         assert board.drop(0, PLAYER2) is False
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -129,7 +130,7 @@ class TestDropMove:
         board = Board()
         for col in range(COLS):
             board.drop(col, PLAYER1)
-        
+
         for col in range(COLS):
             assert board.board[ROWS - 1][col] == PLAYER1
 
@@ -140,6 +141,7 @@ class TestDropMove:
         result = board.drop(-1, PLAYER1)
 
         assert result is False
+
 
 class TestPopMove:
     """Tests for pop and can_pop methods."""
@@ -179,9 +181,9 @@ class TestPopMove:
         assert board.drop(0, PLAYER1) is True
         assert board.drop(0, PLAYER2) is True
         assert board.drop(0, PLAYER1) is True
-        
+
         assert board.pop(0, PLAYER1) is True
-        
+
         # After popping bottom PLAYER1, PLAYER2 should be at bottom
         assert board.board[ROWS - 1][0] == PLAYER2
         assert board.board[ROWS - 2][0] == PLAYER1
@@ -209,7 +211,7 @@ class TestPopMove:
         board.drop(0, PLAYER1)
         board.drop(0, PLAYER2)
         board.drop(0, PLAYER1)
-        
+
         assert board.pop(0, PLAYER1) is True
         assert board.pop(0, PLAYER2) is True
         assert board.pop(0, PLAYER1) is True
@@ -254,7 +256,7 @@ class TestWinDetection:
         # Create a horizontal line of Player1 pieces
         for col in range(4):
             board.drop(col, PLAYER1)
-        
+
         assert board.get_winner() == PLAYER1
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -264,7 +266,7 @@ class TestWinDetection:
         # Stack 4 pieces in same column
         for _ in range(4):
             board.drop(0, PLAYER1)
-        
+
         assert board.get_winner() == PLAYER1
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -279,19 +281,19 @@ class TestWinDetection:
         #   - - X O O - -
         #   - X O O O - -
         board.drop(1, PLAYER1)
-        
+
         board.drop(2, PLAYER2)
-        board.drop(2, PLAYER1) 
-        
+        board.drop(2, PLAYER1)
+
         board.drop(3, PLAYER2)
         board.drop(3, PLAYER2)
-        board.drop(3, PLAYER1) 
-        
+        board.drop(3, PLAYER1)
+
         board.drop(4, PLAYER2)
         board.drop(4, PLAYER2)
         board.drop(4, PLAYER2)
-        board.drop(4, PLAYER1) 
-        
+        board.drop(4, PLAYER1)
+
         assert board.get_winner() == PLAYER1
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -310,16 +312,16 @@ class TestWinDetection:
         board.drop(2, PLAYER2)
         board.drop(2, PLAYER1)
         board.drop(2, PLAYER1)
-        
+
         board.drop(3, PLAYER2)
         board.drop(3, PLAYER2)
-        board.drop(3, PLAYER1) 
+        board.drop(3, PLAYER1)
 
         board.drop(4, PLAYER2)
-        board.drop(4, PLAYER1) 
-        
+        board.drop(4, PLAYER1)
+
         board.drop(5, PLAYER1)
-        
+
         assert board.get_winner() == PLAYER1
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -385,9 +387,9 @@ class TestPossibleMoves:
         """Test possible moves on empty board."""
         board = Board()
         moves = board.get_possible_moves(PLAYER1)
-        
+
         # All columns should allow drop moves
-        drop_moves = [move for move in moves if move[0] == 'drop']
+        drop_moves = [move for move in moves if move[0] == "drop"]
         assert len(drop_moves) >= COLS
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -396,9 +398,9 @@ class TestPossibleMoves:
         board = Board()
         board.drop(0, PLAYER1)
         moves = board.get_possible_moves(PLAYER1)
-        
+
         # Should have drop option for column 0 (not full yet)
-        assert any(move[0] == 'drop' and move[1] == 0 for move in moves)
+        assert any(move[0] == "drop" and move[1] == 0 for move in moves)
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_include_pops(self):
@@ -406,9 +408,9 @@ class TestPossibleMoves:
         board = Board()
         board.drop(0, PLAYER1)
         moves = board.get_possible_moves(PLAYER1)
-        
+
         # Should have pop option for column 0
-        assert any(move[0] == 'pop' and move[1] == 0 for move in moves)
+        assert any(move[0] == "pop" and move[1] == 0 for move in moves)
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_no_pop_for_other_player(self):
@@ -416,9 +418,9 @@ class TestPossibleMoves:
         board = Board()
         board.drop(0, PLAYER2)
         moves = board.get_possible_moves(PLAYER1)
-        
+
         # Should not have pop option for column 0
-        pop_moves = [move for move in moves if move[0] == 'pop' and move[1] == 0]
+        pop_moves = [move for move in moves if move[0] == "pop" and move[1] == 0]
         assert len(pop_moves) == 0
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -428,9 +430,9 @@ class TestPossibleMoves:
         # Fill column 0
         for _ in range(ROWS):
             board.drop(0, PLAYER1)
-        
+
         moves = board.get_possible_moves(PLAYER1)
-        drop_moves = [move for move in moves if move[0] == 'drop' and move[1] == 0]
+        drop_moves = [move for move in moves if move[0] == "drop" and move[1] == 0]
         assert len(drop_moves) == 0
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -438,12 +440,12 @@ class TestPossibleMoves:
         """Test that get_possible_moves returns list of tuples."""
         board = Board()
         moves = board.get_possible_moves(PLAYER1)
-        
+
         assert isinstance(moves, list)
         for move in moves:
             assert isinstance(move, tuple)
             assert len(move) == 2
-            assert move[0] in ['drop', 'pop']
+            assert move[0] in ["drop", "pop"]
             assert isinstance(move[1], int)
 
 
@@ -456,7 +458,7 @@ class TestBoardStateEncoding:
         board = Board()
         board.drop(0, PLAYER1)
         board_tuple = board.to_tuple()
-        
+
         # Should be immutable (tuple)
         assert isinstance(board_tuple, tuple)
 
@@ -466,11 +468,11 @@ class TestBoardStateEncoding:
         board1 = Board()
         board1.drop(0, PLAYER1)
         board1.drop(1, PLAYER2)
-        
+
         board2 = Board()
         board2.drop(0, PLAYER1)
         board2.drop(1, PLAYER2)
-        
+
         assert board1.to_tuple() == board2.to_tuple()
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -478,10 +480,10 @@ class TestBoardStateEncoding:
         """Test that different states produce different tuples."""
         board1 = Board()
         board1.drop(0, PLAYER1)
-        
+
         board2 = Board()
         board2.drop(0, PLAYER2)
-        
+
         assert board1.to_tuple() != board2.to_tuple()
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -489,7 +491,7 @@ class TestBoardStateEncoding:
         """Test that to_flat_list has correct length."""
         board = Board()
         flat = board.to_flat_list()
-        
+
         assert len(flat) == ROWS * COLS
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -497,7 +499,7 @@ class TestBoardStateEncoding:
         """Test to_flat_list for empty board."""
         board = Board()
         flat = board.to_flat_list()
-        
+
         assert all(cell == EMPTY for cell in flat)
 
     @pytest.mark.xfail(raises=NotImplementedError)
@@ -506,9 +508,9 @@ class TestBoardStateEncoding:
         board = Board()
         board.drop(0, PLAYER1)
         board.drop(1, PLAYER2)
-        
+
         flat = board.to_flat_list()
-        
+
         # Bottom row should have pieces in columns 0 and 1
         bottom_row_flat = flat[-COLS:]
         assert bottom_row_flat[0] == PLAYER1
@@ -519,9 +521,9 @@ class TestBoardStateEncoding:
         """Test that to_flat_list uses row-major order."""
         board = Board()
         board.drop(0, PLAYER1)
-        
+
         flat = board.to_flat_list()
-        
+
         # Last element of flat list should be bottom-right cell
         assert flat[-1] == EMPTY  # Bottom right is empty
 
@@ -541,9 +543,9 @@ class TestBoardDisplay:
         """Test string representation of empty board."""
         board = Board()
         board_str = str(board)
-        
+
         # Should contain representation of empty cells
-        assert '-' in board_str
+        assert "-" in board_str
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_with_pieces(self):
@@ -551,22 +553,22 @@ class TestBoardDisplay:
         board = Board()
         board.drop(0, PLAYER1)
         board.drop(1, PLAYER2)
-        
+
         board_str = str(board)
-        
+
         # Should contain both piece representations
-        assert 'X' in board_str
-        assert 'O' in board_str
+        assert "X" in board_str
+        assert "O" in board_str
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_multiple_lines(self):
         """Test that string representation has multiple lines."""
         board = Board()
         board.drop(0, PLAYER1)
-        
+
         board_str = str(board)
-        lines = board_str.strip().split('\n')
-        
+        lines = board_str.strip().split("\n")
+
         # Should have ROWS lines
         assert len(lines) == ROWS
 
@@ -575,8 +577,8 @@ class TestBoardDisplay:
         """Test that each line has correct width."""
         board = Board()
         board_str = str(board)
-        lines = board_str.strip().split('\n')
-        
+        lines = board_str.strip().split("\n")
+
         # Each line should represent COLS columns
         for line in lines:
             # Account for spacing/separators
