@@ -20,7 +20,7 @@ class Board:
     def __init__(self):
         self.board = [[EMPTY] * COLS for _ in range(ROWS)]
 
-    def copy(self):
+    def copy(self) -> Board:
         """Return a deep copy of the board."""
         new_board = Board()
         new_board.board = [row[:] for row in self.board]
@@ -38,6 +38,9 @@ class Board:
         Drop player's disc into column col.
         Returns True on success, False if the column is full.
         """
+        if player not in (PLAYER1, PLAYER2):
+            raise ValueError("player must be PLAYER1 or PLAYER2")
+
         if not self.can_drop(col):
             return False
         # Find the lowest empty row in the column
@@ -71,7 +74,7 @@ class Board:
     # ------------------------------------------------------------------
     # Win / draw detection
     # ------------------------------------------------------------------
-    def _check_line(self, cells) -> int:
+    def _check_line(self, cells: list[int]) -> int:
         """
         Given a list of cell values, return the player who has 4 in a row,
         or 0 if neither does.
@@ -131,7 +134,7 @@ class Board:
     # ------------------------------------------------------------------
     # Possible moves
     # ------------------------------------------------------------------
-    def get_possible_moves(self, player: int):
+    def get_possible_moves(self, player: int) -> list[tuple[str, int]]:
         """
         Return a list of (move_type, col) tuples for the given player.
         move_type is 'drop' or 'pop'.
