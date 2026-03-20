@@ -543,7 +543,7 @@ class TestBoardDisplay:
         board_str = str(board)
         
         # Should contain representation of empty cells
-        assert '-' in board_str or 'E' in board_str or '0' in board_str
+        assert '-' in board_str
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_with_pieces(self):
@@ -555,8 +555,8 @@ class TestBoardDisplay:
         board_str = str(board)
         
         # Should contain both piece representations
-        assert 'X' in board_str or '1' in board_str
-        assert 'O' in board_str or '2' in board_str
+        assert 'X' in board_str
+        assert 'O' in board_str
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_multiple_lines(self):
