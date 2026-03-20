@@ -20,7 +20,7 @@ class Board:
     def __init__(self):
         self.board = [[EMPTY] * COLS for _ in range(ROWS)]
 
-    def copy(self) -> Board:
+    def copy(self) -> "Board":
         """Return a deep copy of the board."""
         new_board = Board()
         new_board.board = [row[:] for row in self.board]
