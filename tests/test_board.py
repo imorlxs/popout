@@ -137,12 +137,9 @@ class TestDropMove:
     def test_drop_invalid_column_index(self):
         """Test drop with invalid column index."""
         board = Board()
-        # Behavior depends on implementation, but should handle gracefully
         result = board.drop(-1, PLAYER1)
-        # Either returns False or raises exception
-        if result is not False:
-            pytest.fail("Expected drop to return False or raise exception for invalid column")
 
+        assert result is False
 
 class TestPopMove:
     """Tests for pop and can_pop methods."""
