@@ -160,6 +160,7 @@ class Board:
     # Display
     # ------------------------------------------------------------------
     def __str__(self) -> str:
+        """Return the string representation of the board"""
         lines = []
         for row in self.board:
             lines.append(''.join(SYMBOLS[cell] for cell in row))
