@@ -12,11 +12,13 @@ from src.game.board import Board, ROWS, COLS, EMPTY, PLAYER1, PLAYER2
 class TestBoardInitialization:
     """Tests for Board initialization."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_init_creates_board(self):
         """Test that __init__ creates a valid board."""
         board = Board()
         assert board is not None
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_init_board_all_empty(self):
         """Test that initialized board has all empty cells."""
         board = Board()
@@ -25,6 +27,7 @@ class TestBoardInitialization:
             for cell in row:
                 assert cell == EMPTY
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_init_board_dimensions(self):
         """Test that board has correct dimensions."""
         board = Board()
@@ -35,7 +38,7 @@ class TestBoardInitialization:
 
 class TestBoardCopy:
     """Tests for Board.copy() method."""
-
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_copy_creates_independent_board(self):
         """Test that copy creates an independent board instance."""
         board1 = Board()
@@ -49,6 +52,7 @@ class TestBoardCopy:
         assert board1.board[ROWS - 1][0] == PLAYER1
         assert board1.board[ROWS - 1][1] == EMPTY
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_copy_preserves_state(self):
         """Test that copy preserves the current board state."""
         board1 = Board()
@@ -65,12 +69,14 @@ class TestBoardCopy:
 class TestDropMove:
     """Tests for drop and can_drop methods."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_can_drop_empty_column(self):
         """Test can_drop returns True for empty column."""
         board = Board()
         assert board.can_drop(0) is True
         assert board.can_drop(COLS - 1) is True
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_drop_single_piece(self):
         """Test dropping a single piece into empty column."""
         board = Board()
@@ -78,6 +84,7 @@ class TestDropMove:
         assert result is True
         assert board.board[ROWS - 1][0] == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_drop_stacks_pieces(self):
         """Test that pieces stack on top of each other."""
         board = Board()
@@ -87,6 +94,7 @@ class TestDropMove:
         assert board.board[ROWS - 1][0] == PLAYER1
         assert board.board[ROWS - 2][0] == PLAYER2
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_drop_fills_column(self):
         """Test dropping pieces until column is full."""
         board = Board()
@@ -95,6 +103,7 @@ class TestDropMove:
             result = board.drop(0, PLAYER1 if i % 2 == 0 else PLAYER2)
             assert result is True
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_can_drop_full_column_returns_false(self):
         """Test can_drop returns False for full column."""
         board = Board()
@@ -104,6 +113,7 @@ class TestDropMove:
         
         assert board.can_drop(0) is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_drop_full_column_returns_false(self):
         """Test drop returns False when column is full."""
         board = Board()
@@ -113,6 +123,7 @@ class TestDropMove:
         
         assert board.drop(0, PLAYER2) is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_drop_multiple_columns(self):
         """Test dropping pieces into multiple columns."""
         board = Board()
@@ -122,6 +133,7 @@ class TestDropMove:
         for col in range(COLS):
             assert board.board[ROWS - 1][col] == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_drop_invalid_column_index(self):
         """Test drop with invalid column index."""
         board = Board()
@@ -135,23 +147,27 @@ class TestDropMove:
 class TestPopMove:
     """Tests for pop and can_pop methods."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_can_pop_empty_column_returns_false(self):
         """Test can_pop returns False for empty column."""
         board = Board()
         assert board.can_pop(0, PLAYER1) is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_can_pop_wrong_player_returns_false(self):
         """Test can_pop returns False if bottom piece doesn't belong to player."""
         board = Board()
         board.drop(0, PLAYER1)
         assert board.can_pop(0, PLAYER2) is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_can_pop_correct_player_returns_true(self):
         """Test can_pop returns True for correct player."""
         board = Board()
         board.drop(0, PLAYER1)
         assert board.can_pop(0, PLAYER1) is True
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_removes_bottom_piece(self):
         """Test that pop removes the bottom piece."""
         board = Board()
@@ -159,6 +175,7 @@ class TestPopMove:
         board.pop(0, PLAYER1)
         assert board.board[ROWS - 1][0] == EMPTY
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_shifts_pieces_down(self):
         """Test that pop shifts pieces down."""
         board = Board()
@@ -173,6 +190,7 @@ class TestPopMove:
         assert board.board[ROWS - 2][0] == PLAYER1
         assert board.board[ROWS - 3][0] == EMPTY
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_wrong_player_returns_false(self):
         """Test pop returns False with wrong player."""
         board = Board()
@@ -180,12 +198,14 @@ class TestPopMove:
         result = board.pop(0, PLAYER2)
         assert result is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_empty_column_returns_false(self):
         """Test pop returns False on empty column."""
         board = Board()
         result = board.pop(0, PLAYER1)
         assert result is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_pop_multiple_pieces_sequence(self):
         """Test popping multiple pieces in sequence."""
         board = Board()
@@ -202,30 +222,35 @@ class TestPopMove:
 class TestWinDetection:
     """Tests for get_winner and _check_line methods."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_four_in_row(self):
         """Test _check_line detects four in a row."""
         board = Board()
         line = [PLAYER1, PLAYER1, PLAYER1, PLAYER1]
         assert board._check_line(line) == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_player2_wins(self):
         """Test _check_line detects player 2 win."""
         board = Board()
         line = [EMPTY, PLAYER2, PLAYER2, PLAYER2, PLAYER2, EMPTY]
         assert board._check_line(line) == PLAYER2
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_no_winner(self):
         """Test _check_line returns 0 for no winner."""
         board = Board()
         line = [PLAYER1, PLAYER2, PLAYER1, PLAYER2]
         assert board._check_line(line) == 0
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_check_line_three_in_row(self):
         """Test _check_line doesn't count three in a row."""
         board = Board()
         line = [PLAYER1, PLAYER1, PLAYER1, PLAYER2]
         assert board._check_line(line) == 0
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_horizontal_win(self):
         """Test detecting horizontal win."""
         board = Board()
@@ -235,6 +260,7 @@ class TestWinDetection:
         
         assert board.get_winner() == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_vertical_win(self):
         """Test detecting vertical win."""
         board = Board()
@@ -244,6 +270,7 @@ class TestWinDetection:
         
         assert board.get_winner() == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_diagonal_win_ascending(self):
         """Test detecting diagonal win (ascending)."""
         board = Board()
@@ -265,6 +292,7 @@ class TestWinDetection:
         
         assert board.get_winner() == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_diagonal_win_descending(self):
         """Test detecting diagonal win (descending)."""
         board = Board()
@@ -284,11 +312,13 @@ class TestWinDetection:
         
         assert board.get_winner() == PLAYER1
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_no_winner_empty_board(self):
         """Test no winner on empty board."""
         board = Board()
         assert board.get_winner() == 0
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_no_winner_partial_board(self):
         """Test no winner with partial board."""
         board = Board()
@@ -301,11 +331,13 @@ class TestWinDetection:
 class TestBoardFull:
     """Tests for is_full method."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_empty_board_not_full(self):
         """Test empty board is not full."""
         board = Board()
         assert board.is_full() is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_partially_filled_board_not_full(self):
         """Test partially filled board is not full."""
         board = Board()
@@ -313,6 +345,7 @@ class TestBoardFull:
             board.drop(col, PLAYER1)
         assert board.is_full() is False
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_completely_filled_board_is_full(self):
         """Test completely filled board is full."""
         board = Board()
@@ -322,6 +355,7 @@ class TestBoardFull:
                 board.drop(col, PLAYER1)
         assert board.is_full() is True
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_full_board_alternates(self):
         """Test full board with alternating players."""
         board = Board()
@@ -336,6 +370,7 @@ class TestBoardFull:
 class TestPossibleMoves:
     """Tests for get_possible_moves method."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_empty_board(self):
         """Test possible moves on empty board."""
         board = Board()
@@ -345,6 +380,7 @@ class TestPossibleMoves:
         drop_moves = [move for move in moves if move[0] == 'drop']
         assert len(drop_moves) >= COLS
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_include_drops(self):
         """Test that possible moves include drop moves."""
         board = Board()
@@ -354,6 +390,7 @@ class TestPossibleMoves:
         # Should have drop option for column 0 (not full yet)
         assert any(move[0] == 'drop' and move[1] == 0 for move in moves)
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_include_pops(self):
         """Test that possible moves include pop moves when applicable."""
         board = Board()
@@ -363,6 +400,7 @@ class TestPossibleMoves:
         # Should have pop option for column 0
         assert any(move[0] == 'pop' and move[1] == 0 for move in moves)
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_no_pop_for_other_player(self):
         """Test no pop move if bottom piece belongs to other player."""
         board = Board()
@@ -373,6 +411,7 @@ class TestPossibleMoves:
         pop_moves = [move for move in moves if move[0] == 'pop' and move[1] == 0]
         assert len(pop_moves) == 0
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_full_column_no_drop(self):
         """Test no drop move for full column."""
         board = Board()
@@ -384,6 +423,7 @@ class TestPossibleMoves:
         drop_moves = [move for move in moves if move[0] == 'drop' and move[1] == 0]
         assert len(drop_moves) == 0
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_possible_moves_returns_tuples(self):
         """Test that get_possible_moves returns list of tuples."""
         board = Board()
@@ -400,6 +440,7 @@ class TestPossibleMoves:
 class TestBoardStateEncoding:
     """Tests for to_tuple and to_flat_list methods."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_tuple_immutable(self):
         """Test that to_tuple returns an immutable structure."""
         board = Board()
@@ -409,6 +450,7 @@ class TestBoardStateEncoding:
         # Should be immutable (tuple)
         assert isinstance(board_tuple, tuple)
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_tuple_represents_state(self):
         """Test that to_tuple represents board state."""
         board1 = Board()
@@ -421,6 +463,7 @@ class TestBoardStateEncoding:
         
         assert board1.to_tuple() == board2.to_tuple()
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_tuple_different_states(self):
         """Test that different states produce different tuples."""
         board1 = Board()
@@ -431,6 +474,7 @@ class TestBoardStateEncoding:
         
         assert board1.to_tuple() != board2.to_tuple()
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_flat_list_length(self):
         """Test that to_flat_list has correct length."""
         board = Board()
@@ -438,6 +482,7 @@ class TestBoardStateEncoding:
         
         assert len(flat) == ROWS * COLS
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_flat_list_empty_board(self):
         """Test to_flat_list for empty board."""
         board = Board()
@@ -445,6 +490,7 @@ class TestBoardStateEncoding:
         
         assert all(cell == EMPTY for cell in flat)
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_flat_list_represents_state(self):
         """Test that to_flat_list represents board state."""
         board = Board()
@@ -458,6 +504,7 @@ class TestBoardStateEncoding:
         assert bottom_row_flat[0] == PLAYER1
         assert bottom_row_flat[1] == PLAYER2
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_to_flat_list_row_major_order(self):
         """Test that to_flat_list uses row-major order."""
         board = Board()
@@ -472,12 +519,14 @@ class TestBoardStateEncoding:
 class TestBoardDisplay:
     """Tests for __str__ method."""
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_returns_string(self):
         """Test that __str__ returns a string."""
         board = Board()
         result = board.__str__()
         assert isinstance(result, str)
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_empty_board(self):
         """Test string representation of empty board."""
         board = Board()
@@ -486,6 +535,7 @@ class TestBoardDisplay:
         # Should contain representation of empty cells
         assert '-' in board_str or 'E' in board_str or '0' in board_str
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_with_pieces(self):
         """Test string representation with pieces."""
         board = Board()
@@ -498,6 +548,7 @@ class TestBoardDisplay:
         assert 'X' in board_str or '1' in board_str
         assert 'O' in board_str or '2' in board_str
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_multiple_lines(self):
         """Test that string representation has multiple lines."""
         board = Board()
@@ -509,6 +560,7 @@ class TestBoardDisplay:
         # Should have ROWS lines
         assert len(lines) == ROWS
 
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_str_correct_width(self):
         """Test that each line has correct width."""
         board = Board()

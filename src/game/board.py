@@ -18,31 +18,31 @@ class Board:
     """Represents a PopOut game board."""
 
     def __init__(self):
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
     
     def copy(self):
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     # ------------------------------------------------------------------
     # Drop move: place a disc in column col from the top
     # ------------------------------------------------------------------
     def can_drop(self, col: int) -> bool:
         """Return True if column col has at least one empty cell."""
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     def drop(self, col: int, player: int) -> bool:
         """
         Drop player's disc into column col.
         Returns True on success, False if the column is full.
         """
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     # ------------------------------------------------------------------
     # Pop move: remove a disc from the bottom of a column
     # ------------------------------------------------------------------
     def can_pop(self, col: int, player: int) -> bool:
         """Return True if column col's bottom cell contains player's disc."""
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     def pop(self, col: int, player: int) -> bool:
         """
@@ -50,7 +50,7 @@ class Board:
         Every disc above it shifts down by one row.
         Returns True on success, False otherwise.
         """
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     # ------------------------------------------------------------------
     # Win / draw detection
@@ -60,18 +60,18 @@ class Board:
         Given a list of cell values, return the player who has 4 in a row,
         or 0 if neither does.
         """
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     def get_winner(self) -> int:
         """
         Return PLAYER1, PLAYER2, or 0 (no winner yet).
         Checks all horizontal, vertical, and diagonal lines.
         """
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     def is_full(self) -> bool:
         """Return True if every cell on the board is occupied."""
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
     
     # ------------------------------------------------------------------
     # Possible moves
@@ -81,22 +81,22 @@ class Board:
         Return a list of (move_type, col) tuples for the given player.
         move_type is 'drop' or 'pop'.
         """
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     # ------------------------------------------------------------------
     # Board state encoding (for repetition detection / dataset)
     # ------------------------------------------------------------------
     def to_tuple(self):
         """Return an immutable representation of the board state."""
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     def to_flat_list(self):
         """Return a flat list of cell values (row-major order)."""
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
 
     # ------------------------------------------------------------------
     # Display
     # ------------------------------------------------------------------
     def __str__(self) -> str:
         """Return the string representation of the board"""
-        return
+        raise NotImplementedError("Board logic is not implemented yet.")
