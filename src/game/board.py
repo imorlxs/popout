@@ -11,7 +11,7 @@ COLS = 7
 EMPTY = 0
 PLAYER1 = 1
 PLAYER2 = 2
-SYMBOLS = {EMPTY: '-', PLAYER1: 'X', PLAYER2: 'O'}
+SYMBOLS = {EMPTY: "-", PLAYER1: "X", PLAYER2: "O"}
 
 
 class Board:
@@ -110,18 +110,14 @@ class Board:
         # Diagonal (top-left to bottom-right)
         for row in range(ROWS - 3):
             for col in range(COLS - 3):
-                w = self._check_line(
-                    [self.board[row + k][col + k] for k in range(4)]
-                )
+                w = self._check_line([self.board[row + k][col + k] for k in range(4)])
                 if w:
                     return w
 
         # Diagonal (top-right to bottom-left)
         for row in range(ROWS - 3):
             for col in range(3, COLS):
-                w = self._check_line(
-                    [self.board[row + k][col - k] for k in range(4)]
-                )
+                w = self._check_line([self.board[row + k][col - k] for k in range(4)])
                 if w:
                     return w
 
@@ -142,10 +138,10 @@ class Board:
         moves = []
         for col in range(COLS):
             if self.can_drop(col):
-                moves.append(('drop', col))
+                moves.append(("drop", col))
         for col in range(COLS):
             if self.can_pop(col, player):
-                moves.append(('pop', col))
+                moves.append(("pop", col))
         return moves
 
     # ------------------------------------------------------------------
@@ -166,5 +162,5 @@ class Board:
         """Return the string representation of the board"""
         lines = []
         for row in self.board:
-            lines.append(''.join(SYMBOLS[cell] for cell in row))
-        return '\n'.join(lines)
+            lines.append("".join(SYMBOLS[cell] for cell in row))
+        return "\n".join(lines)
