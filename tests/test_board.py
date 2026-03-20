@@ -136,6 +136,25 @@ class TestDropMove:
 
         assert result is False
 
+    def test_drop_invalid_player_raises_value_error(self):
+        """Test drop raises ValueError for invalid player value."""
+        board = Board()
+
+        with pytest.raises(ValueError, match="player must be PLAYER1 or PLAYER2"):
+            board.drop(0, 99)
+
+    def test_drop_returns_false_if_no_empty_cell_found(self, monkeypatch):
+        """Test defensive return False when no empty cell exists in scan."""
+        board = Board()
+        col = 0
+
+        # Force can_drop to pass while column has no EMPTY values.
+        monkeypatch.setattr(board, "can_drop", lambda _: True)
+        for row in range(ROWS):
+            board.board[row][col] = PLAYER1
+
+        assert board.drop(col, PLAYER1) is False
+
 class TestPopMove:
     """Tests for pop and can_pop methods."""
 
