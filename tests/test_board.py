@@ -35,6 +35,14 @@ class TestBoardInitialization:
 
 class TestBoardCopy:
     """Tests for Board.copy() method."""
+
+    def test_copy_returns_board_instance(self):
+        """Test that copy returns a Board instance."""
+        board = Board()
+        board_copy = board.copy()
+
+        assert isinstance(board_copy, Board)
+
     def test_copy_creates_independent_board(self):
         """Test that copy creates an independent board instance."""
         board1 = Board()
