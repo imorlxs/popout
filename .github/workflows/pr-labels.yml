@@ -1,0 +1,102 @@
+name: PR Label Management
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize, reopened]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+jobs:
+  label-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Manage PR labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            const REVIEW_PENDING_LABEL = 'review pending';
+            const READY_TO_MERGE_LABEL = 'ready to merge';
+
+            async function ensureLabelExists(name, color, description) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({ owner, repo, name, color, description });
+                }
+              }
+            }
+
+            async function addLabel(prNum, labelName) {
+              await github.rest.issues.addLabels({
+                owner, repo,
+                issue_number: prNum,
+                labels: [labelName]
+              });
+            }
+
+            async function removeLabel(prNum, labelName) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner, repo,
+                  issue_number: prNum,
+                  name: labelName
+                });
+              } catch (e) {
+                if (e.status !== 404) {
+                  throw e;
+                }
+              }
+            }
+
+            async function getApprovalCount(prNum) {
+              const allReviews = [];
+              let page = 1;
+              while (true) {
+                const { data } = await github.rest.pulls.listReviews({
+                  owner, repo,
+                  pull_number: prNum,
+                  per_page: 100,
+                  page
+                });
+                allReviews.push(...data);
+                if (data.length < 100) break;
+                page++;
+              }
+
+              // Sort reviews chronologically so later submissions overwrite earlier ones
+              allReviews.sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at));
+
+              // Track the latest meaningful review state per reviewer
+              const latestReviews = {};
+              for (const review of allReviews) {
+                if (['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(review.state)) {
+                  latestReviews[review.user.login] = review.state;
+                }
+              }
+
+              return Object.values(latestReviews).filter(state => state === 'APPROVED').length;
+            }
+
+            await ensureLabelExists(REVIEW_PENDING_LABEL, 'fbca04', 'PR is waiting for reviews');
+            await ensureLabelExists(READY_TO_MERGE_LABEL, '0e8a16', 'PR has 2 approvals and is ready to merge');
+
+            const approvalCount = await getApprovalCount(prNumber);
+            console.log(`PR #${prNumber} has ${approvalCount} approval(s).`);
+
+            if (approvalCount >= 2) {
+              await addLabel(prNumber, READY_TO_MERGE_LABEL);
+              await removeLabel(prNumber, REVIEW_PENDING_LABEL);
+              console.log(`Added '${READY_TO_MERGE_LABEL}', removed '${REVIEW_PENDING_LABEL}'.`);
+            } else {
+              await addLabel(prNumber, REVIEW_PENDING_LABEL);
+              await removeLabel(prNumber, READY_TO_MERGE_LABEL);
+              console.log(`Added '${REVIEW_PENDING_LABEL}', removed '${READY_TO_MERGE_LABEL}'.`);
+            }
