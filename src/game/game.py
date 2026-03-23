@@ -3,7 +3,6 @@
 # =================================
 
 from src.game.board import SYMBOLS, Board
-from src.game.player import Player, HumanPlayer
 
 # =================================
 #          GAME CLASSES
@@ -11,6 +10,8 @@ from src.game.player import Player, HumanPlayer
 
 PLAYER1_TURN = 1
 PLAYER2_TURN = 2
+
+
 class Game:
 
     # Constructor
@@ -19,26 +20,25 @@ class Game:
         self.player1 = player1
         self.player2 = player2
         self.turn = PLAYER1_TURN
-        
+
     # Cambio de turno
     def switch_turn(self):
 
-        if (self.turn == PLAYER1_TURN):
+        if self.turn == PLAYER1_TURN:
             self.turn = PLAYER2_TURN
         else:
-            self.turn = PLAYER1_TURN 
+            self.turn = PLAYER1_TURN
 
     # Devuelve el jugador actual -> Player()
     def get_actual_player(self, turn):
 
-        if (turn == PLAYER1_TURN):
+        if turn == PLAYER1_TURN:
             return self.player1
         else:
             return self.player2
-        
 
     def play(self):
-       
+
         # Mostrar tablero
         print("=== PopOut Game Start ===")
         print(self.board)
@@ -64,9 +64,8 @@ class Game:
 
         # Fin de partida
         winner = self.board.get_winner()
-        
+
         if winner:
             print(f"\nPlayer {SYMBOLS[winner]} wins!")
         else:
             print("\nIt's a draw!")
-        
