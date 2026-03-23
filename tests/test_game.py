@@ -1,0 +1,108 @@
+# =================================
+#             IMPORTS
+# =================================
+
+from src.game.board import ROWS, COLS, EMPTY, PLAYER1, PLAYER2, SYMBOLS
+from src.game.player import HumanPlayer
+from src.game.game import Game
+ 
+
+# =================================
+#           GAME TESTS
+# =================================
+
+# Ejecutar -> pytest tests/test_game.py -v
+
+class TestGameInitialization:
+    """Tests for Game initialization."""
+ 
+    def test_game_init(self):
+        """Test Game initializes correctly."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        assert game.board is not None
+        assert game.player1 is p1
+        assert game.player2 is p2
+ 
+    def test_game_starts_with_player1_turn(self):
+        """Test Game starts with Player 1's turn."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        assert game.turn == PLAYER1
+ 
+    def test_game_board_is_empty(self):
+        """Test Game starts with empty board."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        for row in game.board.board:
+            for cell in row:
+                assert cell == EMPTY
+ 
+ 
+class TestGameSwitchTurn:
+    """Tests for Game.switch_turn method."""
+ 
+    def test_switch_from_player1_to_player2(self):
+        """Test switch_turn changes from Player 1 to Player 2."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        game.switch_turn()
+        assert game.turn == PLAYER2
+ 
+    def test_switch_from_player2_to_player1(self):
+        """Test switch_turn changes from Player 2 to Player 1."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        game.switch_turn()
+        game.switch_turn()
+        assert game.turn == PLAYER1
+ 
+    def test_switch_turn_multiple_times(self):
+        """Test switch_turn alternates correctly multiple times."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        expected = [PLAYER2, PLAYER1, PLAYER2, PLAYER1]
+        for expected_turn in expected:
+            game.switch_turn()
+            assert game.turn == expected_turn
+ 
+ 
+class TestGameGetActualPlayer:
+    """Tests for Game.get_actual_player method."""
+ 
+    def test_get_player1(self):
+        """Test get_actual_player returns Player 1 on turn 1."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        assert game.get_actual_player(PLAYER1) is p1
+ 
+    def test_get_player2(self):
+        """Test get_actual_player returns Player 2 on turn 2."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        assert game.get_actual_player(PLAYER2) is p2
+ 
+    def test_get_actual_player_after_switch(self):
+        """Test get_actual_player returns correct player after switch."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+ 
+        game.switch_turn()
+        assert game.get_actual_player(game.turn) is p2 
