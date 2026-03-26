@@ -11,8 +11,6 @@ from src.game.player import Player, HumanPlayer
 # =================================
 
 
-# Ejecutar -> pytest tests/test_player.py -v
-
 
 class TestPlayerInitialization:
     """Tests for Player base class initialization."""

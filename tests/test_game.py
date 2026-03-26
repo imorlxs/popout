@@ -11,8 +11,6 @@ from src.game.game import Game
 #           GAME TESTS
 # =================================
 
-# Ejecutar -> pytest tests/test_game.py -v
-
 
 class TestGameInitialization:
     """Tests for Game initialization."""
