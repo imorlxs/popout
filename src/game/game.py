@@ -27,17 +27,18 @@ class Game:
             self.turn = PLAYER1
 
         else:
-            raise ValueError(f"Invalid turn value: {self.turn}")
+            raise ValueError(f"TURN: {self.turn}")
 
-    def get_actual_player(self, turn):
+    def get_actual_player(self):
 
-        if turn == PLAYER1:
+        if self.turn == PLAYER1:
             return self.player1
 
-        elif turn == PLAYER2:
+        elif self.turn == PLAYER2:
             return self.player2
+
         else:
-            raise ValueError(f"Invalid turn value: {self.turn}")
+            raise ValueError(f" INVALID PLAYER OBJECT: {self.turn}")
 
     def play(self):
 
@@ -47,7 +48,8 @@ class Game:
         # While there is no winner and the board is not full
         while not self.board.get_winner() and not self.board.is_full():
 
-            actual_player = self.get_actual_player(self.turn)
+            actual_player = self.get_actual_player()
+            move_type, col = actual_player.get_move(self.board)
 
             # Execute move and check if it was valid
             i = 0
