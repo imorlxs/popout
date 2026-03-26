@@ -11,7 +11,6 @@ from src.game.player import Player, HumanPlayer
 # =================================
 
 
-
 class TestPlayerInitialization:
     """Tests for Player base class initialization."""
 
