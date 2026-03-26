@@ -9,7 +9,6 @@ import pytest
 from src.game.board import Board, ROWS, COLS, EMPTY, PLAYER1, PLAYER2
 
 
-
 class TestBoardInitialization:
     """Tests for Board initialization."""
 

@@ -49,7 +49,6 @@ class Game:
         while not self.board.get_winner() and not self.board.is_full():
 
             actual_player = self.get_actual_player()
-            move_type, col = actual_player.get_move(self.board)
 
             # Execute move and check if it was valid
             i = 0

@@ -12,7 +12,6 @@ from src.game.game import Game
 # =================================
 
 
-
 class TestGameInitialization:
     """Tests for Game initialization."""
 
