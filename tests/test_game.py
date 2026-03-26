@@ -98,7 +98,7 @@ class TestGameGetActualPlayer:
         p2 = Player(PLAYER2)
         game = Game(p1, p2)
 
-        assert game.get_actual_player(PLAYER1) is p1
+        assert game.get_actual_player() is p1
 
     def test_get_player2(self):
         """Test get_actual_player returns Player 2 on turn 2."""
@@ -106,7 +106,8 @@ class TestGameGetActualPlayer:
         p2 = Player(PLAYER2)
         game = Game(p1, p2)
 
-        assert game.get_actual_player(PLAYER2) is p2
+        game.switch_turn()
+        assert game.get_actual_player() is p2
 
     def test_get_actual_player_after_switch(self):
         """Test get_actual_player returns correct player after switch."""
@@ -115,16 +116,17 @@ class TestGameGetActualPlayer:
         game = Game(p1, p2)
 
         game.switch_turn()
-        assert game.get_actual_player(game.turn) is p2
+        assert game.get_actual_player() is p2
 
     def test_get_actual_player_invalid_raises_value_error(self):
         """Test get_actual_player raises ValueError for unexpected turn value."""
         p1 = Player(PLAYER1)
         p2 = Player(PLAYER2)
         game = Game(p1, p2)
+        game.turn = 99
 
         with pytest.raises(ValueError):
-            game.get_actual_player(99)
+            game.get_actual_player()
 
 
 class TestGamePlay:
