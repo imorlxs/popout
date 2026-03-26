@@ -13,6 +13,7 @@ from src.game.game import Game
 
 # Ejecutar -> pytest tests/test_game.py -v
 
+
 class TestGameInitialization:
     """Tests for Game initialization."""
 
@@ -138,15 +139,24 @@ class TestGamePlay:
         p2 = HumanPlayer(PLAYER2)
         game = Game(p1, p2)
 
-        moves = iter([
-            "drop", "0",  # P1
-            "drop", "0",  # P2
-            "drop", "1",  # P1
-            "drop", "1",  # P2
-            "drop", "2",  # P1
-            "drop", "2",  # P2
-            "drop", "3",  # P1 wins
-        ])
+        moves = iter(
+            [
+                "drop",
+                "0",  # P1
+                "drop",
+                "0",  # P2
+                "drop",
+                "1",  # P1
+                "drop",
+                "1",  # P2
+                "drop",
+                "2",  # P1
+                "drop",
+                "2",  # P2
+                "drop",
+                "3",  # P1 wins
+            ]
+        )
         monkeypatch.setattr("builtins.input", lambda _: next(moves))
 
         game.play()

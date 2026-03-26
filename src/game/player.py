@@ -4,17 +4,19 @@
 
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2
 
-
 # =================================
 #          PLAYER CLASSES
 # =================================
+
 
 class Player:
 
     def __init__(self, player_id):
 
         if player_id not in (PLAYER1, PLAYER2):
-            raise ValueError(f"player_id must be {PLAYER1} or {PLAYER2}, got {player_id}")
+            raise ValueError(
+                f"player_id must be {PLAYER1} or {PLAYER2}, got {player_id}"
+            )
 
         self.player_id = player_id
         self.symbol = SYMBOLS[player_id]

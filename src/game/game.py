@@ -8,6 +8,7 @@ from src.game.board import SYMBOLS, Board, PLAYER1, PLAYER2
 #          GAME CLASSES
 # =================================
 
+
 class Game:
 
     def __init__(self, player1, player2):
@@ -17,7 +18,6 @@ class Game:
         self.player2 = player2
         self.turn = PLAYER1
 
-
     def switch_turn(self):
 
         if self.turn == PLAYER1:
@@ -25,22 +25,20 @@ class Game:
 
         elif self.turn == PLAYER2:
             self.turn = PLAYER1
-        
+
         else:
             raise ValueError(f"TURN: {self.turn}")
-        
 
     def get_actual_player(self):
 
         if self.turn == PLAYER1:
             return self.player1
-        
+
         elif self.turn == PLAYER2:
             return self.player2
-        
+
         else:
             raise ValueError(f" INVALID PLAYER OBJECT: {self.turn}")
-         
 
     def play(self):
 
