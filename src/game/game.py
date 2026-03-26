@@ -49,21 +49,26 @@ class Game:
         while not self.board.get_winner() and not self.board.is_full():
 
             actual_player = self.get_actual_player()
-            move_type, col = actual_player.get_move(self.board)
 
             # Execute move and check if it was valid
-            if move_type == "drop":
-                valid = self.board.drop(col, actual_player.player_id)
+            i = 0
+            while True:
+                i += 1
+                if i == 50:
+                    raise RuntimeError("Too many invalid attempts, terminating game.")
+                move_type, col = actual_player.get_move(self.board)
+                if move_type == "drop":
+                    success = self.board.drop(col, actual_player.player_id)
+                elif move_type == "pop":
+                    success = self.board.pop(col, actual_player.player_id)
+                else:
+                    print(f"Unsupported move type: '{move_type}', please try again.")
+                    continue
 
-            elif move_type == "pop":
-                valid = self.board.pop(col, actual_player.player_id)
-
-            else:
-                raise ValueError(f"Invalid move type: {move_type}")
-
-            if not valid:
-                print("Move could not be executed, try again")
-                continue
+                if not success:
+                    print("Invalid move, please try again.")
+                    continue
+                break
 
             print(self.board)
             self.switch_turn()
