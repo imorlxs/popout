@@ -8,6 +8,7 @@ from src.game.board import SYMBOLS, Board, PLAYER1, PLAYER2
 #          GAME CLASSES
 # =================================
 
+
 class Game:
 
     def __init__(self, player1, player2):
@@ -17,7 +18,6 @@ class Game:
         self.player2 = player2
         self.turn = PLAYER1
 
-
     def switch_turn(self):
 
         if self.turn == PLAYER1:
@@ -25,16 +25,19 @@ class Game:
 
         elif self.turn == PLAYER2:
             self.turn = PLAYER1
-        
+
+        else:
+            raise ValueError(f"Invalid turn value: {self.turn}")
 
     def get_actual_player(self, turn):
 
         if turn == PLAYER1:
             return self.player1
-        
+
         elif turn == PLAYER2:
             return self.player2
-         
+        else:
+            raise ValueError(f"Invalid turn value: {self.turn}")
 
     def play(self):
 
@@ -45,14 +48,13 @@ class Game:
         while not self.board.get_winner() and not self.board.is_full():
 
             actual_player = self.get_actual_player(self.turn)
-            move_type, col = actual_player.get_move(self.board)
 
             # Execute move and check if it was valid
             i = 0
             while True:
                 i += 1
-                if (i == 50):
-                    raise RuntimeError("Too many invalid attempts, terminating game.")                 
+                if i == 50:
+                    raise RuntimeError("Too many invalid attempts, terminating game.")
                 move_type, col = actual_player.get_move(self.board)
                 if move_type == "drop":
                     success = self.board.drop(col, actual_player.player_id)
