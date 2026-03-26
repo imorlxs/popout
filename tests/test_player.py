@@ -2,17 +2,16 @@
 #             IMPORTS
 # =================================
 
-
 import pytest
 from src.game.board import Board, PLAYER1, PLAYER2, SYMBOLS
 from src.game.player import Player, HumanPlayer
 
 # =================================
-#           PLAYER TESTS
+#         PLAYER TESTS
 # =================================
 
-# Ejecutar -> pytest tests/test_player.py -v
 
+# Ejecutar -> pytest tests/test_player.py -v
 
 class TestPlayerInitialization:
     """Tests for Player base class initialization."""
@@ -30,12 +29,17 @@ class TestPlayerInitialization:
     def test_player1_symbol(self):
         """Test Player 1 has correct symbol."""
         player = Player(PLAYER1)
-        assert player.symbol == SYMBOLS[PLAYER1]  # 'X'
+        assert player.symbol == SYMBOLS[PLAYER1]
 
     def test_player2_symbol(self):
         """Test Player 2 has correct symbol."""
         player = Player(PLAYER2)
-        assert player.symbol == SYMBOLS[PLAYER2]  # 'O'
+        assert player.symbol == SYMBOLS[PLAYER2]
+
+    def test_invalid_player_id_raises_value_error(self):
+        """Test Player raises ValueError for invalid player_id."""
+        with pytest.raises(ValueError):
+            Player(99)
 
     def test_get_move_raises_not_implemented(self):
         """Test base Player.get_move raises NotImplementedError."""
@@ -70,7 +74,6 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        # Simulate user input: drop, column 0
         inputs = iter(["drop", "0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
@@ -81,13 +84,23 @@ class TestHumanPlayerInitialization:
         assert move[0] in ["drop", "pop"]
         assert isinstance(move[1], int)
 
-    def test_human_player_get_move_invalid_then_valid(self, monkeypatch):
-        """Test HumanPlayer.get_move retries on invalid input."""
+    def test_human_player_get_move_invalid_column_then_valid(self, monkeypatch):
+        """Test HumanPlayer.get_move retries when column input is not a number."""
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        # First input invalid, second valid
-        inputs = iter(["drop", "9", "drop", "0"])
+        inputs = iter(["drop", "asdfdf", "drop", "0"])
+        monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+
+        move = player.get_move(board)
+        assert move == ("drop", 0)
+
+    def test_human_player_get_move_invalid_move_type_then_valid(self, monkeypatch):
+        """Test HumanPlayer.get_move retries when move type is invalid."""
+        player = HumanPlayer(PLAYER1)
+        board = Board()
+
+        inputs = iter(["jsdfjdsjf", "0", "drop", "0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
