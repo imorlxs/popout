@@ -27,7 +27,7 @@ class Player:
 
 
 # =================================
-#          HUMAN PLAYER 
+#          HUMAN PLAYER
 # =================================
 
 class HumanPlayer(Player):
