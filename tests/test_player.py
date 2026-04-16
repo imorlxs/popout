@@ -4,10 +4,10 @@
 
 import pytest
 from src.game.board import Board, PLAYER1, PLAYER2, SYMBOLS
-from src.game.player import Player, HumanPlayer
+from src.game.player import Player, HumanPlayer, RandomPlayer
 
 # =================================
-#         PLAYER TESTS
+#         HUMAN PLAYER TESTS
 # =================================
 
 
@@ -103,3 +103,88 @@ class TestHumanPlayerInitialization:
 
         move = player.get_move(board)
         assert move == ("drop", 0)
+
+
+
+# =================================
+#        RANDOM PLAYER TESTS
+# =================================
+
+class TestRandomPlayerInit:
+
+    def test_init_player1(self):
+        """Test RandomPlayer initializes correctly with PLAYER1."""
+        player = RandomPlayer(PLAYER1)
+        assert player.player_id == PLAYER1
+        assert player.symbol == "X"
+
+    def test_init_player2(self):
+        """Test RandomPlayer initializes correctly with PLAYER2."""
+        player = RandomPlayer(PLAYER2)
+        assert player.player_id == PLAYER2
+        assert player.symbol == "O"
+
+    def test_init_invalid_player_id(self):
+        """Test RandomPlayer raises ValueError with invalid player_id."""
+        with pytest.raises(ValueError):
+            RandomPlayer(99)
+
+
+class TestRandomPlayerGetMove:
+
+    def test_get_move_returns_tuple(self):
+        """Test get_move returns a tuple."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        move = player.get_move(board)
+        assert isinstance(move, tuple)
+
+    def test_get_move_returns_valid_move(self):
+        """Test get_move returns a move that is in possible_moves."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        move = player.get_move(board)
+        assert move in board.get_possible_moves(PLAYER1)
+
+    def test_get_move_returns_valid_move_type(self):
+        """Test get_move returns a move with a valid move type."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        move_type, col = player.get_move(board)
+        assert move_type in ("drop", "pop")
+
+    def test_get_move_returns_valid_column(self):
+        """Test get_move returns a move with a valid column."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        move_type, col = player.get_move(board)
+        assert 0 <= col <= 6
+
+    def test_get_move_is_random(self):
+        """Test get_move does not always return the same move."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        moves = {player.get_move(board) for _ in range(50)}
+        assert len(moves) > 1
+
+    def test_get_move_with_almost_full_board(self):
+        """Test get_move works when only one drop move is available."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        # Fill all columns except col 0 with PLAYER2 tokens
+        # so PLAYER1 has no pop moves available
+        for col in range(1, 7):
+            for _ in range(6):
+                board.drop(col, PLAYER2)
+        move = player.get_move(board)
+        assert move == ("drop", 0)
+
+    def test_get_move_includes_pop_when_available(self, monkeypatch):
+        """Test get_move can return a pop move when available."""
+        player = RandomPlayer(PLAYER1)
+        board = Board()
+        board.drop(0, PLAYER1)
+        # Force random.choice to return the pop move
+        monkeypatch.setattr("random.choice", lambda moves: ("pop", 0))
+        move = player.get_move(board)
+        assert move == ("pop", 0)

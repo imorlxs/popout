@@ -2,6 +2,7 @@
 #             IMPORTS
 # =================================
 
+import random
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2
 
 # =================================
@@ -15,7 +16,7 @@ class Player:
 
         if player_id not in (PLAYER1, PLAYER2):
             raise ValueError(
-                f"player_id must be {PLAYER1} or {PLAYER2}, got {player_id}"
+                f" player_id must be {PLAYER1} or {PLAYER2}, got {player_id}"
             )
 
         self.player_id = player_id
@@ -24,6 +25,10 @@ class Player:
     def get_move(self, board):
         raise NotImplementedError
 
+
+# =================================
+#          HUMAN PLAYER 
+# =================================
 
 class HumanPlayer(Player):
 
@@ -34,7 +39,7 @@ class HumanPlayer(Player):
 
         possible_moves = board.get_possible_moves(self.player_id)
 
-        print(f"\nPossible moves for PLAYER-{self.symbol}: {possible_moves}")
+        print(f"\n Possible moves for PLAYER-{self.symbol}: {possible_moves}")
 
         while True:
 
@@ -55,3 +60,22 @@ class HumanPlayer(Player):
                 return move_type, col
             else:
                 print("INVALID MOVE, try again.")
+
+
+# =================================
+#          RANDOM PLAYER
+# =================================
+
+class RandomPlayer(Player):
+
+    def __init__(self, player_id):
+        super().__init__(player_id)
+
+    def get_move(self, board):
+
+        possible_moves = board.get_possible_moves(self.player_id)
+        move = random.choice(possible_moves)
+
+        print(f"\n RandomPlayer-{self.symbol} plays: {move}")
+
+        return move
