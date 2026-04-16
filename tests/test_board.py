@@ -140,8 +140,7 @@ class TestDropMove:
         """Test drop raises ValueError for invalid player value."""
         board = Board()
 
-        with pytest.raises(ValueError,
-                           match="player must be PLAYER1 or PLAYER2"):
+        with pytest.raises(ValueError, match="player must be PLAYER1 or PLAYER2"):
             board.drop(0, 99)
 
     def test_drop_returns_false_if_no_empty_cell_found(self, monkeypatch):
@@ -409,8 +408,7 @@ class TestPossibleMoves:
         moves = board.get_possible_moves(PLAYER1)
 
         # Should not have pop option for column 0
-        pop_moves = [move for move in moves if move[0]
-                     == "pop" and move[1] == 0]
+        pop_moves = [move for move in moves if move[0] == "pop" and move[1] == 0]
         assert len(pop_moves) == 0
 
     def test_possible_moves_full_column_no_drop(self):
@@ -421,8 +419,7 @@ class TestPossibleMoves:
             board.drop(0, PLAYER1)
 
         moves = board.get_possible_moves(PLAYER1)
-        drop_moves = [move for move in moves if move[0]
-                      == "drop" and move[1] == 0]
+        drop_moves = [move for move in moves if move[0] == "drop" and move[1] == 0]
         assert len(drop_moves) == 0
 
     def test_possible_moves_returns_tuples(self):

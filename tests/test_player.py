@@ -82,8 +82,7 @@ class TestHumanPlayerInitialization:
         assert move[0] in ["drop", "pop"]
         assert isinstance(move[1], int)
 
-    def test_human_player_get_move_invalid_column_then_valid(
-            self, monkeypatch):
+    def test_human_player_get_move_invalid_column_then_valid(self, monkeypatch):
         """Test HumanPlayer.get_move retries when column input
         is not a number."""
         player = HumanPlayer(PLAYER1)
@@ -95,8 +94,7 @@ class TestHumanPlayerInitialization:
         move = player.get_move(board)
         assert move == ("drop", 0)
 
-    def test_human_player_get_move_invalid_move_type_then_valid(
-            self, monkeypatch):
+    def test_human_player_get_move_invalid_move_type_then_valid(self, monkeypatch):
         """Test HumanPlayer.get_move retries when move type is invalid."""
         player = HumanPlayer(PLAYER1)
         board = Board()
@@ -111,6 +109,7 @@ class TestHumanPlayerInitialization:
 # =================================
 #        RANDOM PLAYER TESTS
 # =================================
+
 
 class TestRandomPlayerInit:
 

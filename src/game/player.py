@@ -30,6 +30,7 @@ class Player:
 #          HUMAN PLAYER
 # =================================
 
+
 class HumanPlayer(Player):
 
     def __init__(self, player_id):
@@ -65,6 +66,7 @@ class HumanPlayer(Player):
 # =================================
 #          RANDOM PLAYER
 # =================================
+
 
 class RandomPlayer(Player):
 

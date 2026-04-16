@@ -110,16 +110,14 @@ class Board:
         # Diagonal (top-left to bottom-right)
         for row in range(ROWS - 3):
             for col in range(COLS - 3):
-                w = self._check_line(
-                    [self.board[row + k][col + k] for k in range(4)])
+                w = self._check_line([self.board[row + k][col + k] for k in range(4)])
                 if w:
                     return w
 
         # Diagonal (top-right to bottom-left)
         for row in range(ROWS - 3):
             for col in range(3, COLS):
-                w = self._check_line(
-                    [self.board[row + k][col - k] for k in range(4)])
+                w = self._check_line([self.board[row + k][col - k] for k in range(4)])
                 if w:
                     return w
 
