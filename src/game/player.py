@@ -241,3 +241,95 @@ class MCTSPlayer(Player):
                 node.wins += 1
 
             node = node.parent
+
+#tree reuse
+class MCTSPlayerV2(Player):
+    def __init__(self, player_id, iterations=100):
+        super().__init__(player_id)
+        self.iterations = iterations
+        self.root = None  # ← pamatuje si strom
+
+    def get_move(self, board):
+
+        root = self._find_or_create_root(board)
+
+        for _ in range(self.iterations):
+            node = self._select_next_node(root)
+
+            if not node.is_terminal():
+                node = node.expand()
+
+            result = self._simulate(node)
+            self._backpropagate(node, result)
+
+        best_node = None
+
+        for child in root.children:
+
+            if best_node is None or child.visits > best_node.visits:
+                best_node = child
+
+        print(f"\n MCTSPlayer-{self.symbol} plays: {best_node.move}")
+
+        self.root = best_node
+        self.root.parent = None
+        return best_node.move
+    
+    def _find_or_create_root(self, board):
+ 
+        current_board_tuple = board.to_tuple()
+ 
+        if self.root is not None:
+            # Search among the children of self.root (opponent's replies)
+            for child in self.root.children:
+                if child.board.to_tuple() == current_board_tuple:
+                    child.parent = None
+                    return child
+ 
+        # No match found — create a fresh root
+        return MCTS_Node(board=board.copy(), player_id=self.player_id)
+
+    # Select the most promising node using UCT
+    def _select_next_node(self, node):
+
+        while not node.is_terminal():
+
+            if not node.is_fully_expanded():
+                return node
+
+            node = node.best_child()
+
+        return node
+
+    # Simulate a random game from node and return the winner
+    def _simulate(self, node):
+
+        sim_board = node.board.copy()
+        current_player = node.player_id
+
+        while not sim_board.get_winner() and not sim_board.is_full():
+
+            moves = sim_board.get_possible_moves(current_player)
+            move_type, col = random.choice(moves)
+
+            if move_type == "drop":
+                sim_board.drop(col, current_player)
+            else:
+                sim_board.pop(col, current_player)
+                #elsif error
+
+            current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
+
+        return sim_board.get_winner()
+
+    # Propagate the result up the tree
+    def _backpropagate(self, node, result):
+
+        while node is not None:
+
+            node.visits += 1
+
+            if result == self.player_id:
+                node.wins += 1
+
+            node = node.parent
