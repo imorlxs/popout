@@ -247,7 +247,7 @@ class MCTSPlayerV2(Player):
     def __init__(self, player_id, iterations=100):
         super().__init__(player_id)
         self.iterations = iterations
-        self.root = None  # ← pamatuje si strom
+        self.root = None
 
     def get_move(self, board):
 
@@ -311,6 +311,115 @@ class MCTSPlayerV2(Player):
 
             moves = sim_board.get_possible_moves(current_player)
             move_type, col = random.choice(moves)
+
+            if move_type == "drop":
+                sim_board.drop(col, current_player)
+            else:
+                sim_board.pop(col, current_player)
+                #elsif error
+
+            current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
+
+        return sim_board.get_winner()
+
+    # Propagate the result up the tree
+    def _backpropagate(self, node, result):
+
+        while node is not None:
+
+            node.visits += 1
+
+            if result == self.player_id:
+                node.wins += 1
+
+            node = node.parent
+
+
+#better simulation - check win moves
+class MCTSPlayerV3(Player):
+
+    def __init__(self, player_id, iterations=100):
+        super().__init__(player_id)
+        self.iterations = iterations
+
+    # Select next move to do by simulating using random moves
+    def get_move(self, board):
+
+        root = MCTS_Node(board=board.copy(), player_id=self.player_id)
+
+        for _ in range(self.iterations):
+            node = self._select_next_node(root)
+
+            if not node.is_terminal():
+                node = node.expand()
+
+            result = self._simulate(node)
+            self._backpropagate(node, result)
+
+        best_node = None
+
+        for child in root.children:
+
+            if best_node is None or child.visits > best_node.visits:
+                best_node = child
+
+        print(f"\n MCTSPlayer-{self.symbol} plays: {best_node.move}")
+
+        return best_node.move
+
+    # Select the most promising node using UCT
+    def _select_next_node(self, node):
+
+        while not node.is_terminal():
+
+            if not node.is_fully_expanded():
+                return node
+
+            node = node.best_child()
+
+        return node
+    
+    def _pick_smart_move(self, board, current_player):
+        opponent = PLAYER2 if current_player == PLAYER1 else PLAYER1
+        moves = board.get_possible_moves(current_player)
+
+        # 1. Check if current player can win immediately
+        for move in moves:
+            test_board = board.copy()
+            move_type, col = move
+            if move_type == "drop":
+                test_board.drop(col, current_player)
+            else:
+                test_board.pop(col, current_player)
+            if test_board.get_winner() == current_player:
+                return move
+
+        # 2. Check if opponent can win next turn and block them
+        opponent_moves = board.get_possible_moves(opponent)
+        for move in opponent_moves:
+            test_board = board.copy()
+            move_type, col = move
+            if move_type == "drop":
+                test_board.drop(col, opponent)
+            else:
+                test_board.pop(col, opponent)
+            if test_board.get_winner() == opponent:
+                # Play the same move as ourselves to block
+                if (move_type, col) in moves:
+                    return move
+
+        # 3. No immediate win or block needed — play randomly
+        return random.choice(moves)
+
+    # Simulate a random game from node and return the winner
+    def _simulate(self, node):
+
+        sim_board = node.board.copy()
+        current_player = node.player_id
+
+        while not sim_board.get_winner() and not sim_board.is_full():
+
+            move_type, col = self._pick_smart_move(sim_board, current_player)
 
             if move_type == "drop":
                 sim_board.drop(col, current_player)
