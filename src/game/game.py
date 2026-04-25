@@ -11,6 +11,8 @@ from src.game.board import SYMBOLS, Board, PLAYER1, PLAYER2
 
 class Game:
 
+    MAX_INVALID_ATTEMPTS = 50
+
     def __init__(self, player1, player2):
 
         self.board = Board()
@@ -51,10 +53,10 @@ class Game:
             actual_player = self.get_actual_player()
 
             # Execute move and check if it was valid
-            i = 0
+            attempts = 0
             while True:
-                i += 1
-                if i == 50:
+                attempts += 1
+                if attempts >= self.MAX_INVALID_ATTEMPTS:
                     raise RuntimeError("Too many invalid attempts, terminating game.")
                 move_type, col = actual_player.get_move(self.board)
                 if move_type == "drop":
