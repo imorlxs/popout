@@ -224,7 +224,7 @@ class MCTSPlayer(Player):
                 sim_board.drop(col, current_player)
             else:
                 sim_board.pop(col, current_player)
-                #elsif error
+                # elsif error
 
             current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
 
@@ -242,7 +242,8 @@ class MCTSPlayer(Player):
 
             node = node.parent
 
-#tree reuse
+
+# tree reuse
 class MCTSPlayerV2(Player):
     def __init__(self, player_id, iterations=100):
         super().__init__(player_id)
@@ -274,18 +275,18 @@ class MCTSPlayerV2(Player):
         self.root = best_node
         self.root.parent = None
         return best_node.move
-    
+
     def _find_or_create_root(self, board):
- 
+
         current_board_tuple = board.to_tuple()
- 
+
         if self.root is not None:
             # Search among the children of self.root (opponent's replies)
             for child in self.root.children:
                 if child.board.to_tuple() == current_board_tuple:
                     child.parent = None
                     return child
- 
+
         # No match found — create a fresh root
         return MCTS_Node(board=board.copy(), player_id=self.player_id)
 
@@ -316,7 +317,7 @@ class MCTSPlayerV2(Player):
                 sim_board.drop(col, current_player)
             else:
                 sim_board.pop(col, current_player)
-                #elsif error
+                # elsif error
 
             current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
 
@@ -335,7 +336,7 @@ class MCTSPlayerV2(Player):
             node = node.parent
 
 
-#better simulation - check win moves
+# better simulation - check win moves
 class MCTSPlayerV3(Player):
 
     def __init__(self, player_id, iterations=100):
@@ -378,7 +379,7 @@ class MCTSPlayerV3(Player):
             node = node.best_child()
 
         return node
-    
+
     def _pick_smart_move(self, board, current_player):
         opponent = PLAYER2 if current_player == PLAYER1 else PLAYER1
         moves = board.get_possible_moves(current_player)
@@ -425,7 +426,7 @@ class MCTSPlayerV3(Player):
                 sim_board.drop(col, current_player)
             else:
                 sim_board.pop(col, current_player)
-                #elsif error
+                # elsif error
 
             current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
 
