@@ -20,7 +20,7 @@ class Player:
 
         self.player_id = player_id
         self.symbol = SYMBOLS[player_id]
-        self.debug = false
+        self.debug = False
 
     def set_debug_mode(self):
         self.debug = True
