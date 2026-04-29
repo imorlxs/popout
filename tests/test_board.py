@@ -165,7 +165,8 @@ class TestPopMove:
         assert board.can_pop(0, PLAYER1) is False
 
     def test_can_pop_wrong_player_returns_false(self):
-        """Test can_pop returns False if bottom piece doesn't belong to player."""
+        """Test can_pop returns False if bottom piece doesn't belong
+        to player."""
         board = Board()
         board.drop(0, PLAYER1)
         assert board.can_pop(0, PLAYER2) is False
