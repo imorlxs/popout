@@ -17,6 +17,15 @@ class Game:
         self.player1 = player1
         self.player2 = player2
         self.turn = PLAYER1
+        self.position_history = {}
+        self._record_position()
+
+    def _record_position(self):
+        state = self.board.to_tuple()
+        self.position_history[state] = self.position_history.get(state, 0) + 1
+
+    def is_threefold_repetition(self):
+        return any(count >= 3 for count in self.position_history.values())
 
     def switch_turn(self):
 
@@ -45,8 +54,8 @@ class Game:
         print("=== PopOut Game Start ===")
         print(self.board)
 
-        # While there is no winner and the board is not full
-        while not self.board.get_winner() and not self.board.is_full():
+        # While there is no winner, board is not full, and no threefold repetition
+        while not self.board.get_winner() and not self.board.is_full() and not self.is_threefold_repetition():
 
             actual_player = self.get_actual_player()
             move_type, col = actual_player.get_move(self.board)
@@ -65,6 +74,7 @@ class Game:
                 print("Move could not be executed, try again")
                 continue
 
+            self._record_position()
             print(self.board)
             self.switch_turn()
 
