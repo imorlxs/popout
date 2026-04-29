@@ -118,7 +118,8 @@ class TestGameGetActualPlayer:
         assert game.get_actual_player() is p2
 
     def test_get_actual_player_invalid_raises_value_error(self):
-        """Test get_actual_player raises ValueError for unexpected turn value."""
+        """Test get_actual_player raises ValueError for unexpected
+        turn value."""
         p1 = Player(PLAYER1)
         p2 = Player(PLAYER2)
         game = Game(p1, p2)
