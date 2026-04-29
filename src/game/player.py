@@ -23,8 +23,8 @@ class Player:
         self.symbol = SYMBOLS[player_id]
         self.debug = False
 
-    def set_debug_mode(self):
-        self.debug = True
+    def set_debug_mode(self, enabled: bool = True):
+        self.debug = enabled
 
     def get_move(self, board):
         raise NotImplementedError
