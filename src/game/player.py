@@ -83,6 +83,7 @@ class RandomPlayer(Player):
         possible_moves = board.get_possible_moves(self.player_id)
         move = random.choice(possible_moves)
 
-        print(f"\n RandomPlayer-{self.symbol} plays: {move}")
+        if self.debug:
+            print(f"\n RandomPlayer-{self.symbol} plays: {move}")
 
         return move
