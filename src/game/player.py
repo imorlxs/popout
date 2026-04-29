@@ -20,6 +20,10 @@ class Player:
 
         self.player_id = player_id
         self.symbol = SYMBOLS[player_id]
+        self.debug = false
+
+    def set_debug_mode(self):
+        self.debug = True
 
     def get_move(self, board):
         raise NotImplementedError
@@ -34,7 +38,8 @@ class HumanPlayer(Player):
 
         possible_moves = board.get_possible_moves(self.player_id)
 
-        print(f"\nPossible moves for PLAYER-{self.symbol}: {possible_moves}")
+        if self.debug:
+            print(f"\nPossible moves for PLAYER-{self.symbol}: {possible_moves}")
 
         while True:
 
