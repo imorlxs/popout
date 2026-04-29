@@ -50,7 +50,8 @@ class TestGameInitialization:
         game = Game(p1, p2)
 
         assert len(game.position_history) == 1
-        assert game.position_history[game.board.to_tuple()] == 1
+        state = (game.board.to_tuple(), game.turn)
+        assert game.position_history[state] == 1
 
 
 class TestGameSwitchTurn:
@@ -227,11 +228,25 @@ class TestThreefoldRepetition:
         p2 = Player(PLAYER2)
         game = Game(p1, p2)
 
-        initial_state = game.board.to_tuple()
+        initial_state = (game.board.to_tuple(), game.turn)
         assert game.position_history[initial_state] == 1
 
         game._record_position()
         assert game.position_history[initial_state] == 2
+
+    def test_same_board_different_turn_is_distinct_position(self):
+        """Test same board with opposite player-to-move is tracked separately."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        initial_state = (game.board.to_tuple(), PLAYER1)
+        game.switch_turn()
+        game._record_position()
+        opposite_turn_state = (game.board.to_tuple(), PLAYER2)
+
+        assert game.position_history[initial_state] == 1
+        assert game.position_history[opposite_turn_state] == 1
 
     def test_is_threefold_repetition_true_after_three_occurrences(self):
         """Test is_threefold_repetition returns True after position seen 3 times."""

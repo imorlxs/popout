@@ -21,7 +21,7 @@ class Game:
         self._record_position()
 
     def _record_position(self):
-        state = self.board.to_tuple()
+        state = (self.board.to_tuple(), self.turn)
         self.position_history[state] = self.position_history.get(state, 0) + 1
 
     def is_threefold_repetition(self):
@@ -78,9 +78,9 @@ class Game:
                 print("Move could not be executed, try again")
                 continue
 
-            self._record_position()
             print(self.board)
             self.switch_turn()
+            self._record_position()
 
         # End of game
         winner = self.board.get_winner()
