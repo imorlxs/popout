@@ -55,7 +55,11 @@ class Game:
         print(self.board)
 
         # While there is no winner, board is not full, and no threefold repetition
-        while not self.board.get_winner() and not self.board.is_full() and not self.is_threefold_repetition():
+        while (
+            not self.board.get_winner()
+            and not self.board.is_full()
+            and not self.is_threefold_repetition()
+        ):
 
             actual_player = self.get_actual_player()
             move_type, col = actual_player.get_move(self.board)

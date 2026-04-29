@@ -184,14 +184,22 @@ class TestGamePlay:
         # loop iteration after the 8th move is recorded.
         moves = iter(
             [
-                "drop", "0",  # P1: col0 has P1 at bottom
-                "drop", "0",  # P2: col0 has P1 at bottom, P2 above
-                "pop",  "0",  # P1: removes P1 from bottom; col0 has P2 at bottom
-                "pop",  "0",  # P2: removes P2; col0 empty again (2nd occurrence)
-                "drop", "0",  # P1: col0 has P1 at bottom
-                "drop", "0",  # P2: col0 has P1 at bottom, P2 above
-                "pop",  "0",  # P1: col0 has P2 at bottom
-                "pop",  "0",  # P2: col0 empty again (3rd occurrence -> draw)
+                "drop",
+                "0",  # P1: col0 has P1 at bottom
+                "drop",
+                "0",  # P2: col0 has P1 at bottom, P2 above
+                "pop",
+                "0",  # P1: removes P1 from bottom; col0 has P2 at bottom
+                "pop",
+                "0",  # P2: removes P2; col0 empty again (2nd occurrence)
+                "drop",
+                "0",  # P1: col0 has P1 at bottom
+                "drop",
+                "0",  # P2: col0 has P1 at bottom, P2 above
+                "pop",
+                "0",  # P1: col0 has P2 at bottom
+                "pop",
+                "0",  # P2: col0 empty again (3rd occurrence -> draw)
             ]
         )
         monkeypatch.setattr("builtins.input", lambda _: next(moves))
