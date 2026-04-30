@@ -90,7 +90,7 @@ class RandomPlayer(Player):
 
 
 # MCTS NODE
-class MCTS_Node:
+class MCTSNode:
 
     #  is the C value in MCTS
     def __init__(
@@ -162,7 +162,7 @@ class MCTS_Node:
 
         opponent = PLAYER2 if self.player_id == PLAYER1 else PLAYER1
 
-        child = MCTS_Node(board=new_board, player_id=opponent, move=move, parent=self)
+        child = MCTSNode(board=new_board, player_id=opponent, move=move, parent=self)
 
         self.children.append(child)
 
@@ -179,7 +179,7 @@ class MCTSPlayer(Player):
     # Select next move to do by simulating using random moves
     def get_move(self, board):
 
-        root = MCTS_Node(board=board.copy(), player_id=self.player_id)
+        root = MCTSNode(board=board.copy(), player_id=self.player_id)
 
         for _ in range(self.iterations):
             node = self._select_next_node(root)
@@ -292,7 +292,7 @@ class MCTSPlayerV2(Player):
                     return child
 
         # No match found — create a fresh root
-        return MCTS_Node(board=board.copy(), player_id=self.player_id)
+        return MCTSNode(board=board.copy(), player_id=self.player_id)
 
     # Select the most promising node using UCT
     def _select_next_node(self, node):
@@ -350,7 +350,7 @@ class MCTSPlayerV3(Player):
     # Select next move to do by simulating using random moves
     def get_move(self, board):
 
-        root = MCTS_Node(board=board.copy(), player_id=self.player_id)
+        root = MCTSNode(board=board.copy(), player_id=self.player_id)
 
         for _ in range(self.iterations):
             node = self._select_next_node(root)
