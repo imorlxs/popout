@@ -92,7 +92,8 @@ class RandomPlayer(Player):
 # MCTS NODE
 class MCTS_Node:
 
-    def __init__(self, board, player_id, move=None, parent=None):
+    # exploration is the C value in MCTS
+    def __init__(self, board, player_id, move=None, parent=None, exploration=math.sqrt(2)):
 
         self.board = board
         self.player_id = player_id
@@ -103,6 +104,7 @@ class MCTS_Node:
         self.visits = 0
         self.children = []  # Expanded children list
         self.untried_moves = board.get_possible_moves(player_id)
+        self.exploration = exploration
 
     def is_fully_expanded(self):
         return len(self.untried_moves) == 0
@@ -110,8 +112,8 @@ class MCTS_Node:
     def is_terminal(self):
         return self.board.get_winner() != 0 or self.board.is_full()
 
-    # Calculate UCT score for the node ( UCT = wins/visits + √2{exploration_param} * √(log(father_visits) / own_visits) )
-    def uct_score(self, exploration=math.sqrt(2)):
+    # Calculate UCT score for the node ( UCT = wins/visits + C * √(log(father_visits) / own_visits) )
+    def uct_score(self):
 
         # Si visits = 0 devuelvo infinito para forzar que se visite al menos una vez
         if self.visits == 0:
@@ -126,7 +128,7 @@ class MCTS_Node:
         return exploitation + exploration_term
 
     # Return the child with the highest UCT score
-    def best_child(self, exploration=math.sqrt(2)):
+    def best_child(self):
 
         # exploration parameter that balances between exploring
         # unknown nodes and exploiting nodes with high win rates
