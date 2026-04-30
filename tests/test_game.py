@@ -221,7 +221,7 @@ class TestThreefoldRepetition:
         p2 = Player(PLAYER2)
         game = Game(p1, p2)
 
-        assert game.is_threefold_repetition() is False
+        assert game.is_threefold_repetition is False
 
     def test_record_position_increments_count(self):
         """Test _record_position increments position count."""
@@ -259,7 +259,7 @@ class TestThreefoldRepetition:
         game._record_position()
         game._record_position()
 
-        assert game.is_threefold_repetition() is True
+        assert game.is_threefold_repetition is True
 
     def test_is_threefold_repetition_false_after_two_occurrences(self):
         """Test is_threefold_repetition returns False when max count is 2."""
@@ -270,7 +270,7 @@ class TestThreefoldRepetition:
         # Record same position once more (total: 2).
         game._record_position()
 
-        assert game.is_threefold_repetition() is False
+        assert game.is_threefold_repetition is False
 
     def test_position_history_tracks_distinct_states(self):
         """Test position_history stores distinct board states separately."""

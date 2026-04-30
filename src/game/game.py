@@ -21,13 +21,13 @@ class Game:
         self.turn = PLAYER1
         self.position_history = {}
         self._record_position()
+        self.is_threefold_repetition = False
 
     def _record_position(self):
         state = (self.board.to_tuple(), self.turn)
         self.position_history[state] = self.position_history.get(state, 0) + 1
-
-    def is_threefold_repetition(self):
-        return any(count >= 3 for count in self.position_history.values())
+        if self.position_history[state] >= 3:
+            self.is_threefold_repetition = True
 
     def switch_turn(self):
 
@@ -60,7 +60,7 @@ class Game:
         while (
             not self.board.get_winner()
             and not self.board.is_full()
-            and not self.is_threefold_repetition()
+            and not self.is_threefold_repetition
         ):
 
             actual_player = self.get_actual_player()
