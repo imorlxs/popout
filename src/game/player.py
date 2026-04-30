@@ -93,7 +93,9 @@ class RandomPlayer(Player):
 class MCTS_Node:
 
     #  is the C value in MCTS
-    def __init__(self, board, player_id, move=None, parent=None, exploration=math.sqrt(2)):
+    def __init__(
+        self, board, player_id, move=None, parent=None, exploration=math.sqrt(2)
+    ):
 
         self.board = board
         self.player_id = player_id
@@ -104,7 +106,7 @@ class MCTS_Node:
         self.visits = 0
         self.children = []  # Expanded children list
         self.untried_moves = board.get_possible_moves(player_id)
-        self.exploration = exploration 
+        self.exploration = exploration
 
     def is_fully_expanded(self):
         return len(self.untried_moves) == 0
