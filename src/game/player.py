@@ -85,7 +85,7 @@ class RandomPlayer(Player):
 
 
 # =================================
-#           MCTS CLASES
+#           MCTS CLASSES
 # =================================
 
 
