@@ -45,18 +45,32 @@ class HumanPlayer(Player):
 
         while True:
 
-            move_type = input("Enter move type (drop/pop): ").strip().lower()
-            col_str = input("Enter column [0-6]: ").strip()
+            user_input = (
+                input("Enter move (d0-d6 for drop, p0-p6 for pop): ").strip().lower()
+            )
+
+            if len(user_input) != 2:
+                print("INVALID INPUT: must be 2 characters (e.g., 'd1', 'p3')")
+                continue
+
+            move_char = user_input[0]
+            col_str = user_input[1]
+
+            if move_char == "d":
+                move_type = "drop"
+            elif move_char == "p":
+                move_type = "pop"
+            else:
+                print(
+                    "INVALID MOVE TYPE: first character must be 'd' (drop) or 'p' (pop)"
+                )
+                continue
 
             if not col_str.isdigit():
-                print("INVALID INPUT: column must be a number")
+                print("INVALID INPUT: column must be a number [0-6]")
                 continue
 
             col = int(col_str)
-
-            if move_type not in ("drop", "pop"):
-                print("INVALID MOVE TYPE: must be 'drop' or 'pop'.")
-                continue
 
             if (move_type, col) in possible_moves:
                 return move_type, col
@@ -224,7 +238,7 @@ class MCTSPlayer(Player):
                 sim_board.drop(col, current_player)
             else:
                 sim_board.pop(col, current_player)
-                #elsif error
+                # elsif error
 
             current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
 

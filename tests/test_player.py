@@ -72,7 +72,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["drop", "0"])
+        inputs = iter(["d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -88,7 +88,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["drop", "asdfdf", "drop", "0"])
+        inputs = iter(["dx", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -99,7 +99,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["jsdfjdsjf", "0", "drop", "0"])
+        inputs = iter(["x0", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)

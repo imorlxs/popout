@@ -140,20 +140,13 @@ class TestGamePlay:
 
         moves = iter(
             [
-                "drop",
-                "0",  # P1
-                "drop",
-                "0",  # P2
-                "drop",
-                "1",  # P1
-                "drop",
-                "1",  # P2
-                "drop",
-                "2",  # P1
-                "drop",
-                "2",  # P2
-                "drop",
-                "3",  # P1 wins
+                "d0",  # P1
+                "d0",  # P2
+                "d1",  # P1
+                "d1",  # P2
+                "d2",  # P1
+                "d2",  # P2
+                "d3",  # P1 wins
             ]
         )
         monkeypatch.setattr("builtins.input", lambda _: next(moves))
