@@ -8,7 +8,7 @@ import pytest
 from src.game.board import Board, PLAYER1, PLAYER2, SYMBOLS
 from src.game.player import (
     HumanPlayer,
-    MCTS_Node,
+    MCTSNode,
     MCTSPlayer,
     MCTSPlayerV2,
     MCTSPlayerV3,
@@ -225,7 +225,7 @@ class TestMCTSNode:
 
     def test_init_sets_state_and_moves(self):
         board = Board()
-        node = MCTS_Node(board=board, player_id=PLAYER1, move=("drop", 0), parent=None)
+        node = MCTSNode(board=board, player_id=PLAYER1, move=("drop", 0), parent=None)
 
         assert node.board is board
         assert node.player_id == PLAYER1
@@ -237,7 +237,7 @@ class TestMCTSNode:
         assert node.untried_moves == board.get_possible_moves(PLAYER1)
 
     def test_is_fully_expanded_uses_untried_moves(self):
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
         node.untried_moves = []
 
         assert node.is_fully_expanded() is True
@@ -247,21 +247,21 @@ class TestMCTSNode:
         for col in range(4):
             board.drop(col, PLAYER1)
 
-        node = MCTS_Node(board=board, player_id=PLAYER2)
+        node = MCTSNode(board=board, player_id=PLAYER2)
 
         assert node.is_terminal() is True
 
     def test_uct_score_returns_inf_for_unvisited_node(self):
-        parent = MCTS_Node(board=Board(), player_id=PLAYER1)
+        parent = MCTSNode(board=Board(), player_id=PLAYER1)
         parent.visits = 5
-        node = MCTS_Node(board=Board(), player_id=PLAYER2, parent=parent)
+        node = MCTSNode(board=Board(), player_id=PLAYER2, parent=parent)
 
         assert node.uct_score() == float("inf")
 
     def test_uct_score_matches_formula(self):
-        parent = MCTS_Node(board=Board(), player_id=PLAYER1)
+        parent = MCTSNode(board=Board(), player_id=PLAYER1)
         parent.visits = 10
-        node = MCTS_Node(board=Board(), player_id=PLAYER2, parent=parent)
+        node = MCTSNode(board=Board(), player_id=PLAYER2, parent=parent)
         node.wins = 3
         node.visits = 5
 
@@ -270,18 +270,18 @@ class TestMCTSNode:
         assert node.uct_score() == pytest.approx(expected)
 
     def test_best_child_picks_highest_score(self, monkeypatch):
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
-        child_a = MCTS_Node(
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
+        child_a = MCTSNode(
             board=Board(), player_id=PLAYER2, move=("drop", 0), parent=node
         )
-        child_b = MCTS_Node(
+        child_b = MCTSNode(
             board=Board(), player_id=PLAYER2, move=("drop", 1), parent=node
         )
         node.children = [child_a, child_b]
 
         scores = {("drop", 0): 1.0, ("drop", 1): 2.0}
         monkeypatch.setattr(
-            MCTS_Node,
+            MCTSNode,
             "uct_score",
             lambda self, exploration=math.sqrt(2): scores[self.move],
         )
@@ -289,7 +289,7 @@ class TestMCTSNode:
         assert node.best_child() is child_b
 
     def test_expand_handles_drop_moves(self):
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
         node.untried_moves = [("drop", 0)]
 
         child = node.expand()
@@ -303,7 +303,7 @@ class TestMCTSNode:
     def test_expand_handles_pop_moves(self):
         board = Board()
         board.drop(0, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
         node.untried_moves = [("pop", 0)]
 
         child = node.expand()
@@ -324,19 +324,19 @@ class TestMCTSPlayer:
 
     def test_select_next_node_returns_current_node_when_not_fully_expanded(self):
         player = MCTSPlayer(PLAYER1)
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
 
         assert player._select_next_node(node) is node
 
     def test_select_next_node_descends_to_best_child(self):
         player = MCTSPlayer(PLAYER1)
-        root = MCTS_Node(board=Board(), player_id=PLAYER1)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
         root.untried_moves = []
 
         terminal_board = Board()
         for col in range(4):
             terminal_board.drop(col, PLAYER1)
-        child = MCTS_Node(
+        child = MCTSNode(
             board=terminal_board, player_id=PLAYER2, move=("drop", 0), parent=root
         )
         child.untried_moves = []
@@ -349,7 +349,7 @@ class TestMCTSPlayer:
         board = Board()
         for col in range(3):
             board.drop(col, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
 
         monkeypatch.setattr("src.game.player.random.choice", lambda moves: ("drop", 3))
 
@@ -360,7 +360,7 @@ class TestMCTSPlayer:
         board = Board()
         for _ in range(4):
             board.drop(0, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
 
         calls = {"count": 0}
 
@@ -375,8 +375,8 @@ class TestMCTSPlayer:
 
     def test_backpropagate_updates_visits_and_wins(self):
         player = MCTSPlayer(PLAYER1)
-        root = MCTS_Node(board=Board(), player_id=PLAYER1)
-        child = MCTS_Node(board=Board(), player_id=PLAYER2, parent=root)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
+        child = MCTSNode(board=Board(), player_id=PLAYER2, parent=root)
 
         player._backpropagate(child, PLAYER1)
 
@@ -387,7 +387,7 @@ class TestMCTSPlayer:
 
     def test_backpropagate_counts_losses_only_as_visits(self):
         player = MCTSPlayer(PLAYER1)
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
 
         player._backpropagate(node, PLAYER2)
 
@@ -399,7 +399,7 @@ class TestMCTSPlayer:
         board = Board()
 
         def fake_expand(self):
-            child = MCTS_Node(
+            child = MCTSNode(
                 board=self.board.copy(),
                 player_id=PLAYER2,
                 move=("drop", 0),
@@ -412,7 +412,7 @@ class TestMCTSPlayer:
         monkeypatch.setattr(player, "_select_next_node", lambda root_node: root_node)
         monkeypatch.setattr(player, "_simulate", lambda node: 0)
         monkeypatch.setattr(player, "_backpropagate", lambda node, result: None)
-        monkeypatch.setattr(MCTS_Node, "expand", fake_expand)
+        monkeypatch.setattr(MCTSNode, "expand", fake_expand)
 
         assert player.get_move(board) == ("drop", 0)
 
@@ -427,8 +427,8 @@ class TestMCTSPlayerV2:
     def test_find_or_create_root_reuses_matching_child(self):
         player = MCTSPlayerV2(PLAYER1)
         board = Board()
-        root = MCTS_Node(board=Board(), player_id=PLAYER2)
-        matching_child = MCTS_Node(
+        root = MCTSNode(board=Board(), player_id=PLAYER2)
+        matching_child = MCTSNode(
             board=board.copy(), player_id=PLAYER1, move=("drop", 0), parent=root
         )
         root.children = [matching_child]
@@ -442,7 +442,7 @@ class TestMCTSPlayerV2:
     def test_find_or_create_root_makes_fresh_root_when_no_match(self):
         player = MCTSPlayerV2(PLAYER1)
         board = Board()
-        player.root = MCTS_Node(board=Board(), player_id=PLAYER2)
+        player.root = MCTSNode(board=Board(), player_id=PLAYER2)
 
         result = player._find_or_create_root(board)
 
@@ -452,18 +452,18 @@ class TestMCTSPlayerV2:
 
     def test_select_next_node_returns_current_node_when_not_fully_expanded(self):
         player = MCTSPlayerV2(PLAYER1)
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
 
         assert player._select_next_node(node) is node
 
     def test_select_next_node_descends_to_best_child(self):
         player = MCTSPlayerV2(PLAYER1)
-        root = MCTS_Node(board=Board(), player_id=PLAYER1)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
         root.untried_moves = []
         terminal_board = Board()
         for col in range(4):
             terminal_board.drop(col, PLAYER1)
-        child = MCTS_Node(
+        child = MCTSNode(
             board=terminal_board, player_id=PLAYER2, move=("drop", 0), parent=root
         )
         child.untried_moves = []
@@ -476,7 +476,7 @@ class TestMCTSPlayerV2:
         board = Board()
         for col in range(3):
             board.drop(col, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
 
         monkeypatch.setattr("src.game.player.random.choice", lambda moves: ("drop", 3))
 
@@ -487,7 +487,7 @@ class TestMCTSPlayerV2:
         board = Board()
         for _ in range(4):
             board.drop(0, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
 
         calls = {"count": 0}
 
@@ -502,8 +502,8 @@ class TestMCTSPlayerV2:
 
     def test_backpropagate_updates_visits_and_wins(self):
         player = MCTSPlayerV2(PLAYER1)
-        root = MCTS_Node(board=Board(), player_id=PLAYER1)
-        child = MCTS_Node(board=Board(), player_id=PLAYER2, parent=root)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
+        child = MCTSNode(board=Board(), player_id=PLAYER2, parent=root)
 
         player._backpropagate(child, PLAYER1)
 
@@ -515,11 +515,11 @@ class TestMCTSPlayerV2:
     def test_get_move_sets_root_to_best_child(self, monkeypatch):
         player = MCTSPlayerV2(PLAYER1, iterations=1)
         board = Board()
-        root = MCTS_Node(board=board.copy(), player_id=PLAYER1)
-        weaker_child = MCTS_Node(
+        root = MCTSNode(board=board.copy(), player_id=PLAYER1)
+        weaker_child = MCTSNode(
             board=board.copy(), player_id=PLAYER2, move=("drop", 1), parent=root
         )
-        stronger_child = MCTS_Node(
+        stronger_child = MCTSNode(
             board=board.copy(), player_id=PLAYER2, move=("drop", 0), parent=root
         )
         weaker_child.visits = 1
@@ -545,18 +545,18 @@ class TestMCTSPlayerV3:
 
     def test_select_next_node_returns_current_node_when_not_fully_expanded(self):
         player = MCTSPlayerV3(PLAYER1)
-        node = MCTS_Node(board=Board(), player_id=PLAYER1)
+        node = MCTSNode(board=Board(), player_id=PLAYER1)
 
         assert player._select_next_node(node) is node
 
     def test_select_next_node_descends_to_best_child(self):
         player = MCTSPlayerV3(PLAYER1)
-        root = MCTS_Node(board=Board(), player_id=PLAYER1)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
         root.untried_moves = []
         terminal_board = Board()
         for col in range(4):
             terminal_board.drop(col, PLAYER1)
-        child = MCTS_Node(
+        child = MCTSNode(
             board=terminal_board, player_id=PLAYER2, move=("drop", 0), parent=root
         )
         child.untried_moves = []
@@ -631,7 +631,7 @@ class TestMCTSPlayerV3:
         board = Board()
         for col in range(3):
             board.drop(col, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
 
         monkeypatch.setattr(
             player, "_pick_smart_move", lambda board_arg, current_player: ("drop", 3)
@@ -644,7 +644,7 @@ class TestMCTSPlayerV3:
         board = Board()
         for _ in range(4):
             board.drop(0, PLAYER1)
-        node = MCTS_Node(board=board, player_id=PLAYER1)
+        node = MCTSNode(board=board, player_id=PLAYER1)
 
         calls = {"count": 0}
 
@@ -661,8 +661,8 @@ class TestMCTSPlayerV3:
 
     def test_backpropagate_updates_visits_and_wins(self):
         player = MCTSPlayerV3(PLAYER1)
-        root = MCTS_Node(board=Board(), player_id=PLAYER1)
-        child = MCTS_Node(board=Board(), player_id=PLAYER2, parent=root)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
+        child = MCTSNode(board=Board(), player_id=PLAYER2, parent=root)
 
         player._backpropagate(child, PLAYER1)
 
@@ -676,7 +676,7 @@ class TestMCTSPlayerV3:
         board = Board()
 
         def fake_expand(self):
-            child = MCTS_Node(
+            child = MCTSNode(
                 board=self.board.copy(),
                 player_id=PLAYER2,
                 move=("drop", 0),
@@ -689,6 +689,6 @@ class TestMCTSPlayerV3:
         monkeypatch.setattr(player, "_select_next_node", lambda root_node: root_node)
         monkeypatch.setattr(player, "_simulate", lambda node: 0)
         monkeypatch.setattr(player, "_backpropagate", lambda node, result: None)
-        monkeypatch.setattr(MCTS_Node, "expand", fake_expand)
+        monkeypatch.setattr(MCTSNode, "expand", fake_expand)
 
         assert player.get_move(board) == ("drop", 0)
