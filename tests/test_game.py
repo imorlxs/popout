@@ -43,6 +43,16 @@ class TestGameInitialization:
             for cell in row:
                 assert cell == EMPTY
 
+    def test_game_init_records_initial_position(self):
+        """Test Game records the initial board position on creation."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        assert len(game.position_history) == 1
+        state = (game.board.to_tuple(), game.turn)
+        assert game.position_history[state] == 1
+
 
 class TestGameSwitchTurn:
     """Tests for Game.switch_turn method."""
@@ -162,3 +172,115 @@ class TestGamePlay:
 
         captured = capsys.readouterr()
         assert "X wins" in captured.out
+
+    def test_play_threefold_repetition_draw(self, monkeypatch, capsys):
+        """Test play ends in a draw when the same position occurs 3 times."""
+        p1 = HumanPlayer(PLAYER1)
+        p2 = HumanPlayer(PLAYER2)
+        game = Game(p1, p2)
+
+        # The initial empty board is recorded once at game start.
+        # Cycle: P1 drops col0, P2 drops col0, P1 pops col0, P2 pops col0
+        # returns to the empty board. After two full cycles, the empty board
+        # has been seen 3 times. The draw is detected at the start of the next
+        # loop iteration after the 8th move is recorded.
+        moves = iter(
+            [
+                "drop",
+                "0",  # P1: col0 has P1 at bottom
+                "drop",
+                "0",  # P2: col0 has P1 at bottom, P2 above
+                "pop",
+                "0",  # P1: removes P1 from bottom; col0 has P2 at bottom
+                "pop",
+                "0",  # P2: removes P2; col0 empty again (2nd occurrence)
+                "drop",
+                "0",  # P1: col0 has P1 at bottom
+                "drop",
+                "0",  # P2: col0 has P1 at bottom, P2 above
+                "pop",
+                "0",  # P1: col0 has P2 at bottom
+                "pop",
+                "0",  # P2: col0 empty again (3rd occurrence -> draw)
+            ]
+        )
+        monkeypatch.setattr("builtins.input", lambda _: next(moves))
+
+        game.play()
+
+        captured = capsys.readouterr()
+        assert "draw" in captured.out
+
+
+class TestThreefoldRepetition:
+    """Tests for threefold repetition detection."""
+
+    def test_is_threefold_repetition_false_at_start(self):
+        """Test is_threefold_repetition returns False at game start."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        assert game.is_threefold_repetition is False
+
+    def test_record_position_increments_count(self):
+        """Test _record_position increments position count."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        initial_state = (game.board.to_tuple(), game.turn)
+        assert game.position_history[initial_state] == 1
+
+        game._record_position()
+        assert game.position_history[initial_state] == 2
+
+    def test_same_board_different_turn_is_distinct_position(self):
+        """Test same board with opposite player-to-move is tracked separately."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        initial_state = (game.board.to_tuple(), PLAYER1)
+        game.switch_turn()
+        game._record_position()
+        opposite_turn_state = (game.board.to_tuple(), PLAYER2)
+
+        assert game.position_history[initial_state] == 1
+        assert game.position_history[opposite_turn_state] == 1
+
+    def test_is_threefold_repetition_true_after_three_occurrences(self):
+        """Test is_threefold_repetition returns True after position seen 3 times."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        # Record same (initial) position two more times to reach 3 total.
+        game._record_position()
+        game._record_position()
+
+        assert game.is_threefold_repetition is True
+
+    def test_is_threefold_repetition_false_after_two_occurrences(self):
+        """Test is_threefold_repetition returns False when max count is 2."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        # Record same position once more (total: 2).
+        game._record_position()
+
+        assert game.is_threefold_repetition is False
+
+    def test_position_history_tracks_distinct_states(self):
+        """Test position_history stores distinct board states separately."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        # Record a new state after dropping a piece.
+        game.board.drop(0, PLAYER1)
+        game._record_position()
+
+        # Should now have two distinct entries.
+        assert len(game.position_history) == 2
