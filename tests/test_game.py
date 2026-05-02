@@ -195,6 +195,7 @@ class TestRule3Repetition:
         """Base Player does not claim draws."""
         p = Player(PLAYER1)
         from src.game.board import Board
+
         assert p.wants_to_claim_draw(Board()) is False
 
     def test_play_ends_when_player_claims_repetition(self, monkeypatch, capsys):

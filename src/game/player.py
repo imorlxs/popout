@@ -44,10 +44,14 @@ class HumanPlayer(Player):
 
     def wants_to_claim_draw(self, _board):
         while True:
-            ans = input(
-                f"PLAYER-{self.symbol}: state has repeated 3 times. "
-                "Claim draw? (y/n): "
-            ).strip().lower()
+            ans = (
+                input(
+                    f"PLAYER-{self.symbol}: state has repeated 3 times. "
+                    "Claim draw? (y/n): "
+                )
+                .strip()
+                .lower()
+            )
             if ans in ("y", "yes"):
                 return True
             if ans in ("n", "no"):
@@ -149,7 +153,9 @@ class MCTSNode:
         if self.board.get_winner() != 0:
             return True
         if self.board.is_full():
-            return not any(self.board.can_pop(col, self.player_id) for col in range(COLS))
+            return not any(
+                self.board.can_pop(col, self.player_id) for col in range(COLS)
+            )
         return False
 
     def uct_score(self):
@@ -204,6 +210,7 @@ class MCTSNode:
 # =================================
 #         MCTS PLAYER v1
 # =================================
+
 
 class MCTSPlayer(Player):
 
@@ -312,6 +319,7 @@ class MCTSPlayer(Player):
 #     MCTS PLAYER v2 — tree reuse
 # =================================
 
+
 class MCTSPlayerV2(MCTSPlayer):
     """Identical to MCTSPlayer but reuses the search tree between turns."""
 
@@ -342,6 +350,7 @@ class MCTSPlayerV2(MCTSPlayer):
 # =================================
 #  MCTS PLAYER v3 — smart simulation
 # =================================
+
 
 class MCTSPlayerV3(MCTSPlayer):
     """Identical to MCTSPlayer but uses a win/block heuristic during rollouts."""
@@ -389,6 +398,7 @@ class MCTSPlayerV3(MCTSPlayer):
 #  MCTS PLAYER v4 — max-wins selection
 # =================================
 
+
 class MCTSPlayerV4(MCTSPlayer):
     """Identical to MCTSPlayer but selects the final move by win count
     (winrate * visits = wins) instead of visit count."""
@@ -401,6 +411,7 @@ class MCTSPlayerV4(MCTSPlayer):
 #  MCTS PLAYER v5 — tree reuse + max-wins selection
 # =================================
 
+
 class MCTSPlayerV5(MCTSPlayerV2):
     """Tree reuse (V2) with max-wins final selection instead of max-visits."""
 
@@ -411,6 +422,7 @@ class MCTSPlayerV5(MCTSPlayerV2):
 # =================================
 #  MCTS PLAYER v6 — smart simulation + max-wins selection
 # =================================
+
 
 class MCTSPlayerV6(MCTSPlayerV3):
     """Smart simulation (V3) with max-wins final selection instead of max-visits."""
