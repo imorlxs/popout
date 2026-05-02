@@ -133,7 +133,11 @@ class Board:
     def get_possible_moves(self, player: int) -> list[tuple[str, int]]:
         """
         Return a list of (move_type, col) tuples for the given player.
-        move_type is 'drop' or 'pop'.
+        move_type is 'drop', 'pop', or 'draw'.
+
+        Rule 2: when the board is full, the player to move may choose to end
+        the game as a draw instead of popping. The ('draw', -1) option is
+        included only when the board is full and at least one pop is legal.
         """
         moves = []
         for col in range(COLS):
@@ -142,6 +146,8 @@ class Board:
         for col in range(COLS):
             if self.can_pop(col, player):
                 moves.append(("pop", col))
+        if self.is_full() and any(m[0] == "pop" for m in moves):
+            moves.append(("draw", -1))
         return moves
 
     # ------------------------------------------------------------------

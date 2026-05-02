@@ -434,6 +434,33 @@ class TestPossibleMoves:
             assert move[0] in ["drop", "pop"]
             assert isinstance(move[1], int)
 
+    def test_full_board_with_pops_offers_draw(self):
+        """Rule 2: a full board with pops available adds a ('draw', -1) option."""
+        board = Board()
+        for col in range(COLS):
+            for _ in range(ROWS):
+                board.drop(col, PLAYER1)
+        # Board is full, all bottom cells are PLAYER1 → PLAYER1 has pop moves.
+        moves = board.get_possible_moves(PLAYER1)
+        assert ("draw", -1) in moves
+
+    def test_full_board_without_pops_offers_no_draw(self):
+        """A full board with no pop moves for the player has no draw option."""
+        board = Board()
+        for col in range(COLS):
+            for _ in range(ROWS):
+                board.drop(col, PLAYER1)
+        # PLAYER2 has no pieces at the bottom, so no pops and no draw.
+        moves = board.get_possible_moves(PLAYER2)
+        assert ("draw", -1) not in moves
+
+    def test_non_full_board_offers_no_draw(self):
+        """Draw is never offered when the board isn't full."""
+        board = Board()
+        board.drop(0, PLAYER1)
+        moves = board.get_possible_moves(PLAYER1)
+        assert ("draw", -1) not in moves
+
 
 class TestBoardStateEncoding:
     """Tests for to_tuple and to_flat_list methods."""

@@ -162,3 +162,58 @@ class TestGamePlay:
 
         captured = capsys.readouterr()
         assert "X wins" in captured.out
+
+
+class TestRule3Repetition:
+    """Tests for Rule 3 — threefold repetition."""
+
+    def test_state_counts_initial_after_play_records_starting_state(self):
+        """Recording begins at game start with the initial position."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        assert game.state_counts == {}
+        game._record_state()
+        assert game.state_counts[(game.board.to_tuple(), PLAYER1)] == 1
+
+    def test_state_counts_distinguishes_side_to_move(self):
+        """The same board with different side-to-move counts separately."""
+        p1 = Player(PLAYER1)
+        p2 = Player(PLAYER2)
+        game = Game(p1, p2)
+
+        game._record_state()
+        game.switch_turn()
+        game._record_state()
+
+        snap = game.board.to_tuple()
+        assert game.state_counts[(snap, PLAYER1)] == 1
+        assert game.state_counts[(snap, PLAYER2)] == 1
+
+    def test_player_default_does_not_claim_draw(self):
+        """Base Player does not claim draws."""
+        p = Player(PLAYER1)
+        from src.game.board import Board
+        assert p.wants_to_claim_draw(Board()) is False
+
+    def test_play_ends_when_player_claims_repetition(self, monkeypatch, capsys):
+        """Once the state repeats 3 times, a claiming player ends the game."""
+        from src.game.player import RandomPlayer
+
+        class ClaimingPlayer(RandomPlayer):
+            def wants_to_claim_draw(self, _board):
+                return True
+
+        p1 = ClaimingPlayer(PLAYER1)
+        p2 = ClaimingPlayer(PLAYER2)
+        game = Game(p1, p2)
+
+        # Pre-seed the state count so the very first turn already has 3
+        # occurrences of (initial board, PLAYER1 to move).
+        game.state_counts[(game.board.to_tuple(), PLAYER1)] = 2
+        game.play()
+
+        captured = capsys.readouterr()
+        assert "threefold repetition" in captured.out
+        assert "It's a draw!" in captured.out
