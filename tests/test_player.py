@@ -374,6 +374,9 @@ class TestMCTSPlayer:
         assert player._simulate(node) == PLAYER1
 
     def test_backpropagate_updates_visits_and_wins(self):
+        # Each node's wins reflects the player who MADE the move to reach it.
+        # PLAYER1 moved to reach child, so result=PLAYER1 → child.wins increments.
+        # Root has no incoming move; its wins is unused by UCT.
         player = MCTSPlayer(PLAYER1)
         root = MCTSNode(board=Board(), player_id=PLAYER1)
         child = MCTSNode(board=Board(), player_id=PLAYER2, parent=root)
@@ -383,16 +386,17 @@ class TestMCTSPlayer:
         assert child.visits == 1
         assert child.wins == 1
         assert root.visits == 1
-        assert root.wins == 1
+        assert root.wins == 0
 
     def test_backpropagate_counts_losses_only_as_visits(self):
         player = MCTSPlayer(PLAYER1)
-        node = MCTSNode(board=Board(), player_id=PLAYER1)
+        root = MCTSNode(board=Board(), player_id=PLAYER1)
+        child = MCTSNode(board=Board(), player_id=PLAYER2, parent=root)
 
-        player._backpropagate(node, PLAYER2)
+        player._backpropagate(child, PLAYER2)
 
-        assert node.visits == 1
-        assert node.wins == 0
+        assert child.visits == 1
+        assert child.wins == 0
 
     def test_get_move_returns_best_child_move(self, monkeypatch):
         player = MCTSPlayer(PLAYER1, iterations=1)
@@ -510,7 +514,7 @@ class TestMCTSPlayerV2:
         assert child.visits == 1
         assert child.wins == 1
         assert root.visits == 1
-        assert root.wins == 1
+        assert root.wins == 0
 
     def test_get_move_sets_root_to_best_child(self, monkeypatch):
         player = MCTSPlayerV2(PLAYER1, iterations=1)
@@ -669,7 +673,7 @@ class TestMCTSPlayerV3:
         assert child.visits == 1
         assert child.wins == 1
         assert root.visits == 1
-        assert root.wins == 1
+        assert root.wins == 0
 
     def test_get_move_returns_best_child_move(self, monkeypatch):
         player = MCTSPlayerV3(PLAYER1, iterations=1)
