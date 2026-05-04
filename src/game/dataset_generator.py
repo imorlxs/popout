@@ -17,10 +17,10 @@ MCTS_ITERATIONS = 100
 
 
 def simulate_game(player1, player2):
-    
+
     # Simulate a full game between two MCTS players.
     # Returns a list of (state, move) pairs from both players movements.
-    
+
     board = Board()
     current_player = player1
     other_player = player2
@@ -56,9 +56,9 @@ def simulate_game(player1, player2):
 
 
 def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH):
-    
+
     # Simulate num_games games and save (state, move_type, col) to CSV.
-    
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     player1 = MCTSPlayer(PLAYER1, iterations=MCTS_ITERATIONS)
@@ -80,7 +80,7 @@ def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH):
             samples = simulate_game(player1, player2)
 
             for state, move_type, col in samples:
-                
+
                 writer.writerow(state + [move_type, col])
                 total_samples += 1
 
