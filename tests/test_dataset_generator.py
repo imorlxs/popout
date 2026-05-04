@@ -8,7 +8,6 @@ from src.game.board import PLAYER1, PLAYER2
 from src.game.player import RandomPlayer
 from src.game.dataset_generator import simulate_game, generate_dataset
 
-
 # =================================
 #      DATASET GENERATOR TESTS
 # =================================
