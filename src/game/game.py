@@ -11,21 +11,23 @@ from src.game.board import SYMBOLS, Board, PLAYER1, PLAYER2
 
 class Game:
 
+    MAX_INVALID_ATTEMPTS = 50
+
     def __init__(self, player1, player2):
 
         self.board = Board()
         self.player1 = player1
         self.player2 = player2
         self.turn = PLAYER1
-        # Rule 3: track (board, side-to-move) occurrences for threefold repetition.
-        self.state_counts = {}
+        self.position_history = {}
+        self._record_position()
+        self.is_threefold_repetition = False
 
-    def _state_key(self):
-        return (self.board.to_tuple(), self.turn)
-
-    def _record_state(self):
-        key = self._state_key()
-        self.state_counts[key] = self.state_counts.get(key, 0) + 1
+    def _record_position(self):
+        state = (self.board.to_tuple(), self.turn)
+        self.position_history[state] = self.position_history.get(state, 0) + 1
+        if self.position_history[state] >= 3:
+            self.is_threefold_repetition = True
 
     def switch_turn(self):
 
@@ -53,50 +55,41 @@ class Game:
 
         print("=== PopOut Game Start ===")
         print(self.board)
-        self._record_state()
 
-        drawn = False
-        while not self.board.get_winner() and not drawn:
+        # While there is no winner, board is not full, and no threefold repetition
+        while (
+            not self.board.get_winner()
+            and not self.board.is_full()
+            and not self.is_threefold_repetition
+        ):
 
             actual_player = self.get_actual_player()
 
-            # Rule 2: a full board with no pops available is an automatic draw.
-            possible_moves = self.board.get_possible_moves(actual_player.player_id)
-            if not possible_moves:
+            # Execute move and check if it was valid
+            attempts = 0
+            while True:
+                attempts += 1
+                if attempts >= self.MAX_INVALID_ATTEMPTS:
+                    raise RuntimeError("Too many invalid attempts, terminating game.")
+                move_type, col = actual_player.get_move(self.board)
+                if move_type == "drop":
+                    success = self.board.drop(col, actual_player.player_id)
+                elif move_type == "pop":
+                    success = self.board.pop(col, actual_player.player_id)
+                else:
+                    print(f"Unsupported move type: '{move_type}', please try again.")
+                    continue
+
+                if not success:
+                    print("Invalid move, please try again.")
+                    continue
                 break
-
-            # Rule 3: if the current state has occurred 3+ times, the side
-            # to move may claim a draw before playing.
-            if self.state_counts[self._state_key()] >= 3:
-                if actual_player.wants_to_claim_draw(self.board):
-                    drawn = True
-                    print(
-                        f"\n PLAYER-{SYMBOLS[self.turn]} claims draw by "
-                        "threefold repetition."
-                    )
-                    break
-
-            move_type, col = actual_player.get_move(self.board)
-
-            if move_type == "draw":
-                drawn = True
-                break
-
-            if move_type == "drop":
-                valid = self.board.drop(col, actual_player.player_id)
-            elif move_type == "pop":
-                valid = self.board.pop(col, actual_player.player_id)
-            else:
-                raise ValueError(f"Invalid move type: {move_type}")
-
-            if not valid:
-                print("Move could not be executed, try again")
-                continue
 
             print(self.board)
             self.switch_turn()
-            self._record_state()
+            self._record_position()
 
+        # End of game
         winner = self.board.get_winner()
 
         if winner:
