@@ -6,7 +6,7 @@ import math
 import random
 import pandas as pd
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2, COLS
-from src.game.decision_tree_player import ID3
+from src.game.decision_tree_player import PopOutID3
 
 # =================================
 #          PLAYER CLASSES
@@ -460,11 +460,7 @@ class DecisionTreePlayer(Player):
         X = df[[f"cell_{i}" for i in range(42)]].values.tolist()
         y = df["label"].tolist()
 
-        tree = ID3(
-            numerical_attributes=list(range(42)),
-            min_samples=5,
-            max_depth=15,
-        )
+        tree = PopOutID3()
 
         tree.fit(X, y)
 
