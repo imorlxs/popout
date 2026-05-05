@@ -437,11 +437,12 @@ class MCTSPlayerV6(MCTSPlayerV3):
 
     def _select_final_move(self, root):
         return max(root.children, key=lambda c: c.wins)
-    
+
 
 # =================================
 #      DECISSION TREE PLAYER
 # =================================
+
 
 class DecisionTreePlayer(Player):
 
@@ -495,7 +496,7 @@ class DecisionTreePlayer(Player):
 
         # Fallback if prediction is invalid or not in possible moves
         move = random.choice(possible_moves)
-        
+
         print(f"\n DecisionTreePlayer-{self.symbol} fallback plays: {move}")
 
         return move

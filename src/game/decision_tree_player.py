@@ -21,22 +21,27 @@ class DecisionNode:
 
 
 class ID3:
-    
+
     # Decision tree learner using the ID3 algorithm with information gain.
     # Supports both categorical and numerical attributes.
     # Numerical attributes are split with the best binary threshold found by exhaustive search.
 
-    def __init__(self, numerical_attributes=None, attribute_names=None, min_samples=10, max_depth=10):
+    def __init__(
+        self,
+        numerical_attributes=None,
+        attribute_names=None,
+        min_samples=10,
+        max_depth=10,
+    ):
         self.root = None
         self.numerical_attributes = set(numerical_attributes or [])
         self.attribute_names = attribute_names
         self.min_samples = min_samples
         self.max_depth = max_depth
 
-
-# =================================
-#         PUBLIC INTERFACE
-# =================================
+    # =================================
+    #         PUBLIC INTERFACE
+    # =================================
 
     def fit(self, X, y):
 
@@ -53,10 +58,9 @@ class ID3:
 
         return self._traverse(self.root, x)
 
-
-# =================================
-#          TREE BUILDING
-# =================================
+    # =================================
+    #          TREE BUILDING
+    # =================================
 
     def _build(self, X, y, attributes, depth):
 
@@ -83,7 +87,9 @@ class ID3:
 
             # Binary split — attribute stays available for further splits at different thresholds
 
-            left_X, left_y, right_X, right_y = self._split_numerical(X, y, best_attr, best_threshold)
+            left_X, left_y, right_X, right_y = self._split_numerical(
+                X, y, best_attr, best_threshold
+            )
 
             node.children["<="] = self._build(left_X, left_y, attributes, depth + 1)
             node.children[">"] = self._build(right_X, right_y, attributes, depth + 1)
@@ -97,7 +103,9 @@ class ID3:
                 subset_X = [X[i] for i, x in enumerate(X) if x[best_attr] == val]
                 subset_y = [y[i] for i, x in enumerate(X) if x[best_attr] == val]
 
-                node.children[val] = self._build(subset_X, subset_y, remaining, depth + 1)
+                node.children[val] = self._build(
+                    subset_X, subset_y, remaining, depth + 1
+                )
 
         return node
 
@@ -118,18 +126,16 @@ class ID3:
 
         return best_attr, best_gain, best_threshold
 
-# =================================
-#         INFORMATION GAIN
-# =================================
+    # =================================
+    #         INFORMATION GAIN
+    # =================================
 
     def _entropy(self, y):
 
         total = len(y)
 
         return -sum(
-            (c / total) * math.log2(c / total)
-            for c in Counter(y).values()
-            if c > 0
+            (c / total) * math.log2(c / total) for c in Counter(y).values() if c > 0
         )
 
     def _categorical_gain(self, X, y, attr):
@@ -150,7 +156,7 @@ class ID3:
 
         if len(values) == 1:
             return 0, None
-        
+
         base = self._entropy(y)
         total = len(y)
         best_gain, best_threshold = -1, None
@@ -161,10 +167,9 @@ class ID3:
             left_y = [y[j] for j, x in enumerate(X) if x[attr] <= threshold]
             right_y = [y[j] for j, x in enumerate(X) if x[attr] > threshold]
 
-            weighted = (
-                (len(left_y) / total) * self._entropy(left_y)
-                + (len(right_y) / total) * self._entropy(right_y)
-            )
+            weighted = (len(left_y) / total) * self._entropy(left_y) + (
+                len(right_y) / total
+            ) * self._entropy(right_y)
 
             gain = base - weighted
 
@@ -173,33 +178,32 @@ class ID3:
 
         return best_gain, best_threshold
 
-# =================================
-#          PREDICTION
-# =================================
+    # =================================
+    #          PREDICTION
+    # =================================
 
     def _traverse(self, node, x):
 
         if node.is_leaf:
             return node.label
-        
+
         if node.is_numerical:
             key = "<=" if x[node.attribute] <= node.threshold else ">"
             return self._traverse(node.children[key], x)
-        
+
         val = x[node.attribute]
 
         if val not in node.children:
             return None
-        
+
         return self._traverse(node.children[val], x)
 
-# =================================
-#          HELPERS
-# =================================
+    # =================================
+    #          HELPERS
+    # =================================
 
     def _majority(self, y):
         return Counter(y).most_common(1)[0][0]
-
 
     def _split_numerical(self, X, y, attr, threshold):
 
@@ -214,12 +218,12 @@ class ID3:
             else:
                 right_X.append(x)
                 right_y.append(y[i])
-                
+
         return left_X, left_y, right_X, right_y
 
-# =================================
-#          VISUAL DISPLAY
-# =================================
+    # =================================
+    #          VISUAL DISPLAY
+    # =================================
 
     def print_tree(self, node=None, prefix="", branch=""):
 
@@ -234,7 +238,7 @@ class ID3:
             if self.attribute_names
             else f"attr_{node.attribute}"
         )
-        
+
         if node.is_numerical:
             print(f"{prefix}{branch}{name} <= {node.threshold:.3f}?")
             self.print_tree(node.children["<="], prefix + "    ", "YES: ")
