@@ -4,7 +4,9 @@
 
 import math
 import random
+import pandas as pd
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2, COLS
+from src.game.decision_tree_player import ID3
 
 # =================================
 #          PLAYER CLASSES
@@ -435,3 +437,65 @@ class MCTSPlayerV6(MCTSPlayerV3):
 
     def _select_final_move(self, root):
         return max(root.children, key=lambda c: c.wins)
+    
+
+# =================================
+#      DECISSION TREE PLAYER
+# =================================
+
+class DecisionTreePlayer(Player):
+
+    def __init__(self, player_id, csv_path="data/dataset.csv"):
+        super().__init__(player_id)
+        self.tree = self._train(csv_path)
+
+    def _train(self, csv_path):
+
+        df = pd.read_csv(csv_path)
+
+        # Combine move_type and col into a single label e.g. "drop_3", "pop_0"
+        df["label"] = df["move_type"] + "_" + df["col"].astype(str)
+
+        X = df[[f"cell_{i}" for i in range(42)]].values.tolist()
+        y = df["label"].tolist()
+
+        tree = ID3(
+            numerical_attributes=list(range(42)),
+            min_samples=5,
+            max_depth=15,
+        )
+
+        tree.fit(X, y)
+
+        return tree
+
+    def get_move(self, board):
+
+        state = board.to_flat_list()
+        prediction = self.tree.predict(state)
+        possible_moves = board.get_possible_moves(self.player_id)
+
+        if prediction is not None:
+
+            parts = prediction.rsplit("_", 1)
+
+            if len(parts) == 2:
+
+                move_type, col_str = parts
+
+                if col_str.isdigit():
+
+                    move = (move_type, int(col_str))
+
+                    if move in possible_moves:
+
+                        print(f"\n DecisionTreePlayer-{self.symbol} plays: {move}")
+
+                        return move
+
+        # Fallback if prediction is invalid or not in possible moves
+        move = random.choice(possible_moves)
+        
+        print(f"\n DecisionTreePlayer-{self.symbol} fallback plays: {move}")
+
+        return move
