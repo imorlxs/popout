@@ -53,13 +53,13 @@ class TestGenerateDataset:
     def test_generate_dataset_creates_file(self, tmp_path):
         """Test generate_dataset creates a CSV file."""
         output = str(tmp_path / "test_dataset.csv")
-        generate_dataset(num_games=2, output_path=output)
+        generate_dataset(num_games=2, output_path=output, iterations=10)
         assert os.path.exists(output)
 
     def test_generate_dataset_has_header(self, tmp_path):
         """Test generated CSV has correct header."""
         output = str(tmp_path / "test_dataset.csv")
-        generate_dataset(num_games=2, output_path=output)
+        generate_dataset(num_games=2, output_path=output, iterations=10)
         with open(output) as f:
             header = f.readline().strip().split(",")
         assert header[0] == "cell_0"
@@ -70,7 +70,7 @@ class TestGenerateDataset:
     def test_generate_dataset_has_rows(self, tmp_path):
         """Test generated CSV has at least one data row."""
         output = str(tmp_path / "test_dataset.csv")
-        generate_dataset(num_games=2, output_path=output)
+        generate_dataset(num_games=2, output_path=output, iterations=10)
         with open(output) as f:
             lines = f.readlines()
         assert len(lines) > 1

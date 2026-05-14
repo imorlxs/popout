@@ -71,7 +71,7 @@ def simulate_game(player1, player2):
     return samples
 
 
-def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH):
+def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH, iterations=MCTS_ITERATIONS):
 
     # Simulate num_games games and save (state, move_type, col) to CSV.
     # Each game cycles through all MCTS player class combinations so the
@@ -83,7 +83,9 @@ def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH):
     header = [f"cell_{i}" for i in range(42)] + ["move_type", "col"]
 
     total_samples = 0
-    player_cycle = itertools.cycle(PLAYER_CLASSES)
+    # Cycle through every ordered pair of player classes so all matchups and
+    # PLAYER1/PLAYER2 role assignments are covered across games.
+    pair_cycle = itertools.cycle(itertools.permutations(PLAYER_CLASSES, 2))
 
     with open(output_path, "w", newline="") as f:
 
@@ -92,11 +94,10 @@ def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH):
 
         for game_num in range(1, num_games + 1):
 
-            cls1 = next(player_cycle)
-            cls2 = next(player_cycle)
+            cls1, cls2 = next(pair_cycle)
 
-            player1 = cls1(PLAYER1, iterations=MCTS_ITERATIONS)
-            player2 = cls2(PLAYER2, iterations=MCTS_ITERATIONS)
+            player1 = cls1(PLAYER1, iterations=iterations)
+            player2 = cls2(PLAYER2, iterations=iterations)
 
             print(
                 f"Game {game_num}/{num_games}: "
