@@ -3,7 +3,8 @@
 # =================================
 
 import math
-from src.game.decision_tree_player import ID3, DecisionNode
+from src.decision_tree.id3 import ID3
+from src.decision_tree.tree import DecisionNode
 
 # =================================
 #        DECISION NODE TESTS

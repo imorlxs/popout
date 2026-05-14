@@ -5,8 +5,8 @@
 import csv
 import itertools
 import os
-from src.game.board import Board, PLAYER1, PLAYER2
-from src.game.player import (
+from ..game.board import Board, PLAYER1, PLAYER2
+from ..game.player import (
     MCTSPlayer,
     MCTSPlayerV2,
     MCTSPlayerV3,

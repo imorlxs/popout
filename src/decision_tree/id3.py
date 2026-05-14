@@ -1,23 +1,7 @@
-# =================================
-#             IMPORTS
-# =================================
-
 import math
 from collections import Counter
 
-
-class DecisionNode:
-
-    def __init__(self, attribute=None, threshold=None, label=None, is_numerical=False):
-        self.attribute = attribute
-        self.threshold = threshold
-        self.label = label
-        self.is_numerical = is_numerical
-        self.children = {}
-
-    @property
-    def is_leaf(self):
-        return self.label is not None
+from .tree import DecisionNode
 
 
 class ID3:
@@ -249,28 +233,3 @@ class ID3:
             for val, child in node.children.items():
                 self.print_tree(child, prefix + "    ", f"={val}: ")
 
-
-# Two types of Decision trees depending on dataset
-
-
-# Use this one for the notebook, is the iris csv version
-class IrisID3(ID3):
-    # ID3 pre-configured for the Iris dataset (4 continuous features, 3 classes)
-
-    def __init__(self):
-        super().__init__(
-            numerical_attributes=list(range(4)),
-            min_samples=2,
-            max_depth=10,
-        )
-
-
-class PopOutID3(ID3):
-    # ID3 pre-configured for PopOut board states (42 discrete cells: 0, 1, 2)
-
-    def __init__(self):
-        super().__init__(
-            numerical_attributes=list(range(42)),
-            min_samples=5,
-            max_depth=15,
-        )

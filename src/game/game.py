@@ -2,7 +2,7 @@
 #             IMPORTS
 # =================================
 
-from src.game.board import SYMBOLS, Board, PLAYER1, PLAYER2
+from .board import SYMBOLS, Board, PLAYER1, PLAYER2
 
 # =================================
 #          GAME CLASSES
