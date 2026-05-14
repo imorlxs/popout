@@ -1,17 +1,13 @@
 import importlib
 from types import SimpleNamespace
 
-import pytest
 
 from src.game.board import Board, PLAYER1, PLAYER2
 
 # Some versions of the project have a broken or incompatible
 # `src.mcts.mcts` module that raises on import. If importing that
 # module fails for any reason, skip these MCTS integration tests.
-try:
-    mcts_mod = importlib.import_module("src.mcts.mcts")
-except Exception:
-    pytest.skip("src.mcts.mcts import failed; skipping MCTS tests", allow_module_level=True)
+mcts_mod = importlib.import_module("src.mcts.mcts")
 
 
 def test_apply_move_to_board_drop_and_toggle():
@@ -44,19 +40,12 @@ def test_heuristic_move_prefers_winning_move(monkeypatch):
     mcts_mod = importlib.import_module("src.mcts.mcts")
     MCTS = mcts_mod.MCTS
 
-    # Make Board.get_legal_moves available for the MCTS implementation
-    monkeypatch.setattr(
-        "src.game.board.Board.get_legal_moves",
-        lambda self, player: self.get_possible_moves(player),
-        raising=True,
-    )
-
     m = MCTS(rollout_policy="heuristic")
     board = Board()
     for col in range(3):
         board.drop(col, PLAYER1)
 
-    legal = board.get_legal_moves(PLAYER1)
+    legal = board.get_possible_moves(PLAYER1)
 
     move = m._heuristic_move(board, PLAYER1, legal)
 
@@ -75,12 +64,6 @@ def test_simulate_uses_drop_moves(monkeypatch):
 
     monkeypatch.setattr(
         "src.mcts.mcts.random.choice", lambda moves: ("drop", 3), raising=True
-    )
-
-    monkeypatch.setattr(
-        "src.game.board.Board.get_legal_moves",
-        lambda self, player: self.get_possible_moves(player),
-        raising=True,
     )
 
     m = MCTS()
@@ -112,11 +95,6 @@ def test_simulate_uses_pop_moves(monkeypatch):
         return PLAYER1 if calls["count"] > 1 else 0
 
     monkeypatch.setattr("src.game.board.Board.get_winner", fake_get_winner, raising=True)
-    monkeypatch.setattr(
-        "src.game.board.Board.get_legal_moves",
-        lambda self, player: self.get_possible_moves(player),
-        raising=True,
-    )
 
     m = MCTS()
     board = Board()
@@ -141,3 +119,4 @@ def test_backpropagate_updates_visits_and_wins():
     assert child.wins == 1.0
     assert root.visits == 1
     assert root.wins == 1.0
+

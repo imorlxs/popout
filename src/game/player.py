@@ -4,6 +4,8 @@
 
 import random
 from .board import SYMBOLS, PLAYER1, PLAYER2
+from ..mcts.mcts import MCTS
+
 
 # =================================
 #          PLAYER CLASSES
@@ -142,15 +144,15 @@ class MCTSPlayer:
         Maximum children to expand per node. None means expand all.
     """
 
-    def __init__(self, iterations: int = 1000, exploration_constant: float = 1.414,
+    def __init__(self, player_id, iterations: int = 1000, exploration_constant: float = 1.414,
                  max_children: int = None, rollout_policy: str = 'random'):
+        self.player_id = player_id
         self.iterations = iterations
         self.exploration_constant = exploration_constant
         self.max_children = max_children
         self.rollout_policy = rollout_policy
 
-    def choose_move(self, game):
-        from ..mcts import MCTS
+    def get_move(self, game):
         mcts = MCTS(
             iterations=self.iterations,
             exploration_constant=self.exploration_constant,

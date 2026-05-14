@@ -5,8 +5,7 @@
 import random
 
 from .node import MCTSNode
-from ..game.board import PLAYER1, PLAYER2
-from ..game.player import Player
+from ..game.board import Board, PLAYER1, PLAYER2, ROWS, COLS
 
 class MCTS:
     """
@@ -53,7 +52,7 @@ class MCTS:
         """
         board_copy = game.board.copy()
         current_player = game.current_player
-        legal_moves = game.get_legal_moves()
+        legal_moves = game.get_possible_moves()
 
         if not legal_moves:
             return ('draw', -1)
@@ -99,7 +98,7 @@ class MCTS:
         """Expand one untried move from node."""
         move = node.untried_moves.pop(random.randrange(len(node.untried_moves)))
         new_board, new_player = self._apply_move_to_board(board.copy(), move, player)
-        legal = new_board.get_legal_moves(new_player)
+        legal = new_board.get_possible_moves(new_player)
         child = MCTSNode(
             state_tuple=new_board.to_tuple(),
             current_player=new_player,
@@ -133,7 +132,7 @@ class MCTS:
             if board.is_full():
                 return 0  # draw
 
-            legal = board.get_legal_moves(current)
+            legal = board.get_possible_moves(current)
             if not legal:
                 return 0
 
@@ -186,7 +185,7 @@ class MCTS:
                 # This move 'accidentally' lets opponent win → skip
                 continue
             # Simulate opponent's best response
-            for opp_move in b.get_legal_moves(opponent):
+            for opp_move in b.get_possible_moves(opponent):
                 b2 = b.copy()
                 omt, oc = opp_move
                 if omt == 'drop':
@@ -242,7 +241,7 @@ class MCTS:
             return True
         if board.is_full():
             return True
-        if not board.get_legal_moves(player):
+        if not board.get_possible_moves(player):
             return True
         return False
 
