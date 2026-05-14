@@ -82,7 +82,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["drop", "0"])
+        inputs = iter(["d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -93,12 +93,11 @@ class TestHumanPlayerInitialization:
         assert isinstance(move[1], int)
 
     def test_human_player_get_move_invalid_column_then_valid(self, monkeypatch):
-        """Test HumanPlayer.get_move retries when column input
-        is not a number."""
+        """Test HumanPlayer.get_move retries when column input is not a number."""
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["drop", "asdfdf", "drop", "0"])
+        inputs = iter(["dasdfdf", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -109,7 +108,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["jsdfjdsjf", "0", "drop", "0"])
+        inputs = iter(["j0", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -124,7 +123,18 @@ class TestHumanPlayerInitialization:
             board, "get_possible_moves", lambda _player_id: [("drop", 0)]
         )
 
-        inputs = iter(["drop", "1", "drop", "0"])
+        inputs = iter(["d1", "d0"])
+        monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+
+        move = player.get_move(board)
+        assert move == ("drop", 0)
+
+    def test_human_player_get_move_out_of_range_column_then_valid(self, monkeypatch):
+        """Test HumanPlayer.get_move retries when column is out of range."""
+        player = HumanPlayer(PLAYER1)
+        board = Board()
+
+        inputs = iter(["d7", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
