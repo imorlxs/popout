@@ -71,7 +71,9 @@ def simulate_game(player1, player2):
     return samples
 
 
-def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH, iterations=MCTS_ITERATIONS):
+def generate_dataset(
+    num_games=NUM_GAMES, output_path=OUTPUT_PATH, iterations=MCTS_ITERATIONS
+):
 
     # Simulate num_games games and save (state, move_type, col) to CSV.
     # Each game cycles through all MCTS player class combinations so the
