@@ -76,30 +76,39 @@ class HumanPlayer(Player):
         while True:
 
             prompt = (
-                "Enter move type (drop/pop/draw): "
+                "Enter move (d<col>/p<col>/draw) [e.g., d3, p6]: "
                 if can_draw
-                else "Enter move type (drop/pop): "
+                else "Enter move (d<col>/p<col>) [e.g., d3, p6]: "
             )
-            move_type = input(prompt).strip().lower()
+            command = input(prompt).strip().lower()
 
-            if move_type == "draw":
+            if command == "draw":
                 if can_draw:
                     return ("draw", -1)
                 print("Cannot declare draw right now.")
                 continue
 
-            col_str = input("Enter column [0-6]: ").strip()
+            if len(command) < 2:
+                print("INVALID INPUT: must be d<col>, p<col>, or draw")
+                continue
+
+            move_type_char = command[0]
+            col_str = command[1:]
+
+            if move_type_char == "d":
+                move_type = "drop"
+            elif move_type_char == "p":
+                move_type = "pop"
+            else:
+                valid = "d<col>, p<col>, or draw" if can_draw else "d<col> or p<col>"
+                print(f"INVALID MOVE TYPE: must be {valid}")
+                continue
 
             if not col_str.isdigit():
                 print("INVALID INPUT: column must be a number")
                 continue
 
             col = int(col_str)
-
-            if move_type not in ("drop", "pop"):
-                valid = "'drop', 'pop', or 'draw'." if can_draw else "'drop' or 'pop'."
-                print(f"INVALID MOVE TYPE: must be {valid}")
-                continue
 
             if (move_type, col) in possible_moves:
                 return move_type, col
