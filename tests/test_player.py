@@ -5,6 +5,7 @@
 import math
 
 import pytest
+from types import SimpleNamespace
 from src.game.board import Board, PLAYER1, PLAYER2, SYMBOLS
 from src.game.player import (
     HumanPlayer,
@@ -316,3 +317,129 @@ class TestMCTSNode:
 # =================================
 #           MCTS PLAYER TESTS
 # =================================
+
+
+class TestMCTSPlayer:
+
+    def test_get_move_calls_mcts_search(self, monkeypatch):
+        # Patch the MCTS.search method to return a known move
+        from src.game import player as player_mod
+
+        monkeypatch.setattr(player_mod.MCTS, "search", lambda self, game: ("drop", 1), raising=True)
+
+        player = player_mod.MCTSPlayer(PLAYER1)
+
+        game = SimpleNamespace(board=Board(), current_player=PLAYER1, get_possible_moves=lambda: [])
+
+        move = player.get_move(game)
+
+        assert move == ("drop", 1)
+
+    def test_constructor_passes_parameters_to_mcts(self, monkeypatch):
+        # Replace the MCTS class with a dummy to capture init args
+        from src.game import player as player_mod
+
+        class DummyMCTS:
+            last_init = None
+
+            def __init__(self, iterations=0, exploration_constant=0.0, max_children=None, rollout_policy='random'):
+                DummyMCTS.last_init = {
+                    "iterations": iterations,
+                    "exploration_constant": exploration_constant,
+                    "max_children": max_children,
+                    "rollout_policy": rollout_policy,
+                }
+
+            def search(self, game):
+                return ("pop", 0)
+
+        monkeypatch.setattr(player_mod, "MCTS", DummyMCTS, raising=True)
+
+        player = player_mod.MCTSPlayer(PLAYER2, iterations=5, exploration_constant=0.5, max_children=3, rollout_policy='heuristic')
+
+        game = SimpleNamespace(board=Board(), current_player=PLAYER2, get_possible_moves=lambda: [])
+
+        move = player.get_move(game)
+
+        assert move == ("pop", 0)
+        assert DummyMCTS.last_init == {
+            "iterations": 5,
+            "exploration_constant": 0.5,
+            "max_children": 3,
+            "rollout_policy": 'heuristic',
+        }
+
+
+def test_human_wants_to_claim_draw_prompts(monkeypatch):
+    from src.game.player import HumanPlayer
+
+    inputs = iter(["maybe", "Y"])
+    monkeypatch.setattr("builtins.input", lambda prompt=None: next(inputs))
+
+    player = HumanPlayer(PLAYER1)
+
+    assert player.wants_to_claim_draw(None) is True
+
+
+def test_decision_tree_player_uses_trained_tree(monkeypatch):
+    # Patch _train to return a fake tree with a predictable prediction
+    from src.game.player import DecisionTreePlayer
+
+    class FakeTree:
+        def predict(self, state):
+            return "drop_0"
+
+    monkeypatch.setattr(DecisionTreePlayer, "_train", lambda self, path: FakeTree(), raising=False)
+
+    player = DecisionTreePlayer(PLAYER1)
+
+    # Provide a board that returns a move list including drop_0
+    board = Board()
+    # Ensure move is legal
+    assert ("drop", 0) in board.get_possible_moves(PLAYER1)
+
+    move = player.get_move(board)
+
+    assert move == ("drop", 0)
+
+
+def test_player_set_debug_and_human_draw_not_allowed(monkeypatch, capsys):
+    # set_debug_mode toggles debug printing
+    p = Player(PLAYER1)
+    p.set_debug_mode(True)
+    assert p.debug is True
+
+    # HumanPlayer: attempt to declare draw when it's not available
+    hp = HumanPlayer(PLAYER1)
+    # make possible_moves not include draw
+    board = Board()
+    monkeypatch.setattr(board, "get_possible_moves", lambda pid: [("drop", 0)])
+
+    inputs = iter(["draw", "drop", "0"])
+    monkeypatch.setattr("builtins.input", lambda prompt=None: next(inputs))
+
+    move = hp.get_move(board)
+
+    captured = capsys.readouterr()
+    assert "Cannot declare draw right now." in captured.out
+    assert move == ("drop", 0)
+
+
+def test_decision_tree_player_fallback(monkeypatch):
+    from src.game.player import DecisionTreePlayer
+
+    class FakeTree2:
+        def predict(self, state):
+            return "not_a_valid_prediction"
+
+    monkeypatch.setattr(DecisionTreePlayer, "_train", lambda self, path: FakeTree2(), raising=False)
+
+    # Ensure deterministic fallback
+    monkeypatch.setattr("random.choice", lambda moves: ("pop", 0), raising=True)
+
+    player = DecisionTreePlayer(PLAYER1)
+    board = Board()
+
+    move = player.get_move(board)
+
+    assert move == ("pop", 0)

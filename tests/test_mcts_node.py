@@ -97,3 +97,40 @@ class TestMCTSNode:
         assert child.player_id == PLAYER2
         assert child.board.board[5][0] == 0
         assert node.children == [child]
+
+
+def test_is_terminal_draw_move():
+    board = Board()
+    node = MCTSNode(board=board, player_id=PLAYER1, move=("draw", -1), parent=None)
+    assert node.is_terminal() is True
+
+
+def test_is_terminal_full_board_no_pops(monkeypatch):
+    board = Board()
+    # Fill the board and ensure can_pop returns False for all cols
+    for col in range(7):
+        for _ in range(6):
+            board.drop(col, PLAYER1)
+
+    node = MCTSNode(board=board, player_id=PLAYER1)
+
+    # Force can_pop to return False for all columns
+    monkeypatch.setattr(board, "can_pop", lambda c, pid: False)
+
+    assert node.is_terminal() is True
+
+
+def test_is_terminal_full_board_with_pop(monkeypatch):
+    board = Board()
+    for col in range(7):
+        for _ in range(6):
+            board.drop(col, PLAYER1)
+
+    node = MCTSNode(board=board, player_id=PLAYER1)
+
+    # Force can_pop to return True for at least one column
+    monkeypatch.setattr(board, "can_pop", lambda c, pid: c == 0)
+    # Ensure no winner short-circuits the terminal check
+    monkeypatch.setattr(board, "get_winner", lambda: 0)
+
+    assert node.is_terminal() is False

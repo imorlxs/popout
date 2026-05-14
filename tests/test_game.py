@@ -211,6 +211,48 @@ class TestGamePlay:
         captured = capsys.readouterr()
         assert "draw" in captured.out
 
+    def test_play_unsupported_move_type_prints_message(self, capsys):
+        """Test play handles unsupported move types gracefully."""
+
+        class DummyPlayer:
+            def __init__(self, player_id, moves):
+                self.player_id = player_id
+                self._moves = iter(moves)
+
+            def get_move(self, board):
+                return next(self._moves)
+
+        # Player1 returns unsupported move once, then a valid drop to let game proceed
+        p1 = DummyPlayer(PLAYER1, [("weird", 0), ("drop", 0), ("drop", 1), ("drop", 2), ("drop", 3)])
+        # Player2 returns safe moves
+        p2 = DummyPlayer(PLAYER2, [("drop", 0), ("drop", 1), ("drop", 2), ("drop", 3)])
+
+        game = Game(p1, p2)
+
+        game.play()
+
+        captured = capsys.readouterr()
+        assert "Unsupported move type" in captured.out
+
+    def test_play_too_many_invalid_attempts_raises(self):
+        """Test play raises RuntimeError after MAX_INVALID_ATTEMPTS invalid attempts."""
+
+        class AlwaysInvalidPlayer:
+            def __init__(self, player_id):
+                self.player_id = player_id
+
+            def get_move(self, board):
+                return ("bad", 0)
+
+        p1 = AlwaysInvalidPlayer(PLAYER1)
+        p2 = AlwaysInvalidPlayer(PLAYER2)
+
+        game = Game(p1, p2)
+        game.MAX_INVALID_ATTEMPTS = 3
+
+        with pytest.raises(RuntimeError):
+            game.play()
+
 
 class TestThreefoldRepetition:
     """Tests for threefold repetition detection."""
