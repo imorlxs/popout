@@ -71,7 +71,7 @@ class Game:
                 attempts += 1
                 if attempts >= self.MAX_INVALID_ATTEMPTS:
                     raise RuntimeError("Too many invalid attempts, terminating game.")
-                move_type, col = actual_player.get_move(self.board)
+                move_type, col = actual_player.get_move(self)
                 if move_type == "drop":
                     success = self.board.drop(col, actual_player.player_id)
                 elif move_type == "pop":
@@ -96,3 +96,7 @@ class Game:
             print(f"\n Player {SYMBOLS[winner]} wins!")
         else:
             print("\n It's a draw!")
+
+    def get_possible_moves(self):
+        actual_player = self.get_actual_player()
+        return self.board.get_possible_moves(actual_player.player_id)

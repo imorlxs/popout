@@ -117,9 +117,9 @@ class RandomPlayer(Player):
     def __init__(self, player_id):
         super().__init__(player_id)
 
-    def get_move(self, board):
+    def get_move(self, game):
 
-        possible_moves = board.get_possible_moves(self.player_id)
+        possible_moves = game.get_possible_moves()
         move = random.choice(possible_moves)
 
         if self.debug:
@@ -162,18 +162,7 @@ class MCTSPlayer:
             rollout_policy=self.rollout_policy,
         )
 
-        # If a full game object is provided (has board/current_player/get_possible_moves), use it.
-        if hasattr(game, "board") and hasattr(game, "current_player") and hasattr(game, "get_possible_moves"):
-            return mcts.search(game)
-
-        # Otherwise assume a Board was passed (Game.play passes only the board).
-        board = game
-        wrapper = SimpleNamespace(
-            board=board,
-            current_player=self.player_id,
-            get_possible_moves=lambda: board.get_possible_moves(self.player_id),
-        )
-        return mcts.search(wrapper)
+        return mcts.search(game)      
 
 # =================================
 #      DECISSION TREE PLAYER
@@ -186,11 +175,12 @@ class DecisionTreePlayer(Player):
         super().__init__(player_id)
         self.tree = self._train(csv_path)
 
-    def get_move(self, board):
+    def get_move(self, game):
 
+        board = game.board
         state = board.to_flat_list()
         prediction = self.tree.predict(state)
-        possible_moves = board.get_possible_moves(self.player_id)
+        possible_moves = game.get_possible_moves()
 
         if prediction is not None:
 
