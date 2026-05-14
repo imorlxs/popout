@@ -6,7 +6,6 @@ import math
 import random
 import pandas as pd
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2, COLS
-from src.game.decision_tree_player import PopOutID3
 
 # =================================
 #          PLAYER CLASSES
@@ -444,55 +443,44 @@ class MCTSPlayerV6(MCTSPlayerV3):
 # =================================
 
 
-class DecisionTreePlayer(Player):
+class DecisionTreePlayer:
+    """
+    Player that uses a trained ID3 decision tree to choose a move.
 
-    def __init__(self, player_id, csv_path="data/dataset.csv"):
-        super().__init__(player_id)
-        self.tree = self._train(csv_path)
+    Parameters
+    ----------
+    tree : ID3DecisionTree
+        A trained decision tree instance.
+    fallback : player object, optional
+        Player used when the tree cannot produce a legal move.
+        Defaults to RandomPlayer.
+    """
 
-    def _train(self, csv_path):
-
-        df = pd.read_csv(csv_path)
-
-        # Combine move_type and col into a single label e.g. "drop_3", "pop_0"
-        df["label"] = df["move_type"] + "_" + df["col"].astype(str)
-
-        X = df[[f"cell_{i}" for i in range(42)]].values.tolist()
-        y = df["label"].tolist()
-
-        tree = PopOutID3()
-
-        tree.fit(X, y)
-
-        return tree
+    def __init__(self, tree, fallback=None):
+        self.tree = tree
+        self.fallback = fallback or RandomPlayer()
 
     def get_move(self, board):
+        # Encode the board as a feature vector
+        features = board.to_flat_list()
+        features.append(self.player_id)
 
-        state = board.to_flat_list()
-        prediction = self.tree.predict(state)
-        possible_moves = board.get_possible_moves(self.player_id)
+        try:
+            prediction = self.tree.predict(features)
+            # prediction is expected to be (move_type, col) or a string 'type_col'
+            if isinstance(prediction, str) and '_' in prediction:
+                parts = prediction.split('_')
+                move_type = parts[0]
+                col = int(parts[1])
+                move = (move_type, col)
+            else:
+                move = prediction
 
-        if prediction is not None:
+            legal = board.get_possible_moves(self.player_id)
+            if move in legal:
+                return move
+        except Exception:
+            pass
 
-            parts = prediction.rsplit("_", 1)
-
-            if len(parts) == 2:
-
-                move_type, col_str = parts
-
-                if col_str.isdigit():
-
-                    move = (move_type, int(col_str))
-
-                    if move in possible_moves:
-
-                        print(f"\n DecisionTreePlayer-{self.symbol} plays: {move}")
-
-                        return move
-
-        # Fallback if prediction is invalid or not in possible moves
-        move = random.choice(possible_moves)
-
-        print(f"\n DecisionTreePlayer-{self.symbol} fallback plays: {move}")
-
-        return move
+        # Fallback if tree predicts an illegal move
+        return self.fallback.get_move(board)
