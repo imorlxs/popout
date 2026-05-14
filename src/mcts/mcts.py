@@ -8,223 +8,243 @@ from .node import MCTSNode
 from ..game.board import PLAYER1, PLAYER2
 from ..game.player import Player
 
+class MCTS:
+    """
+    Monte Carlo Tree Search with UCT.
 
-class MCTSPlayer(Player):
+    Parameters
+    ----------
+    iterations : int
+        Total number of simulation iterations.
+    exploration_constant : float
+        UCT exploration parameter C.
+    max_children : int or None
+        Maximum children expanded per node; None = expand all.
+    rollout_policy : str
+        'random' – uniform random rollout (default).
+        'heuristic' – prefer winning / blocking moves during rollout.
+    """
 
-    def __init__(self, player_id, iterations=10000):
-        super().__init__(player_id)
+    def __init__(self, iterations: int = 1000,
+                 exploration_constant: float = 1.414,
+                 max_children: int = None,
+                 rollout_policy: str = 'random'):
         self.iterations = iterations
+        self.exploration_constant = exploration_constant
+        self.max_children = max_children
+        self.rollout_policy = rollout_policy
 
-    def wants_to_claim_draw(self, _board):
-        # Reaching a 3-fold repetition means MCTS isn't finding a win;
-        # claiming the draw is preferable to looping indefinitely.
-        return True
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
+    def search(self, game) -> tuple:
+        """
+        Run MCTS from the current game state.
 
-    def get_move(self, board):
+        Parameters
+        ----------
+        game : PopOutGame
+            The current game (not mutated).
 
-        root = self._build_root(board)
+        Returns
+        -------
+        (move_type, col) : tuple
+            The best move found.
+        """
+        board_copy = game.board.copy()
+        current_player = game.current_player
+        legal_moves = game.get_legal_moves()
+
+        if not legal_moves:
+            return ('draw', -1)
+
+        # Build the root node
+        root = MCTSNode(
+            state_tuple=board_copy.to_tuple(),
+            current_player=current_player,
+            untried_moves=list(legal_moves),
+        )
 
         for _ in range(self.iterations):
-            node = self._select_next_node(root)
+            # --- Selection ---
+            node, board_sim, player_sim = self._select(root, board_copy.copy(), current_player)
 
-            if not node.is_terminal():
-                node = node.expand()
+            # --- Expansion ---
+            if node.untried_moves and not self._is_terminal_board(board_sim, player_sim):
+                node, board_sim, player_sim = self._expand(node, board_sim, player_sim)
 
-            result = self._simulate(node)
-            self._backpropagate(node, result)
+            # --- Simulation (rollout) ---
+            result = self._simulate(board_sim, player_sim)
 
-        best_node = self._select_final_move(root)
+            # --- Backpropagation ---
+            self._backpropagate(node, result, current_player)
 
-        print(f"\n {self.__class__.__name__}-{self.symbol} plays: {best_node.move}")
+        best = root.most_visited_child()
+        return best.move
 
-        self._after_search(best_node)
-        return best_node.move
+    # ------------------------------------------------------------------
+    # Selection
+    # ------------------------------------------------------------------
+    def _select(self, node: MCTSNode, board: Board, player: int):
+        """Traverse the tree using UCT until an unexpanded node is found."""
+        while not node.untried_moves and node.children:
+            node = node.best_child(self.exploration_constant)
+            board, player = self._apply_move_to_board(board, node.move, player)
+        return node, board, player
 
-    def _build_root(self, board):
-        return MCTSNode(board=board.copy(), player_id=self.player_id)
+    # ------------------------------------------------------------------
+    # Expansion
+    # ------------------------------------------------------------------
+    def _expand(self, node: MCTSNode, board: Board, player: int):
+        """Expand one untried move from node."""
+        move = node.untried_moves.pop(random.randrange(len(node.untried_moves)))
+        new_board, new_player = self._apply_move_to_board(board.copy(), move, player)
+        legal = new_board.get_legal_moves(new_player)
+        child = MCTSNode(
+            state_tuple=new_board.to_tuple(),
+            current_player=new_player,
+            move=move,
+            parent=node,
+            untried_moves=legal,
+        )
+        node.children.append(child)
+        return child, new_board, new_player
 
-    def _after_search(self, _best_node):
-        # Hook for subclasses that need to act on the chosen node (e.g. tree reuse).
-        pass
+    # ------------------------------------------------------------------
+    # Simulation (rollout)
+    # ------------------------------------------------------------------
+    def _simulate(self, board: Board, player: int) -> int:
+        """
+        Play a game to completion using the chosen rollout policy.
 
-    def _select_final_move(self, root):
-        return max(root.children, key=lambda c: c.visits)
+        Returns
+        -------
+        winner : int
+            PLAYER1, PLAYER2, or 0 (draw).
+        """
+        board = board.copy()
+        current = player
+        max_moves = ROWS * COLS * 2  # safety cap
 
-    def _select_next_node(self, node):
+        for _ in range(max_moves):
+            winner = board.get_winner()
+            if winner:
+                return winner
+            if board.is_full():
+                return 0  # draw
 
-        while not node.is_terminal():
+            legal = board.get_legal_moves(current)
+            if not legal:
+                return 0
 
-            if not node.is_fully_expanded():
-                return node
+            if self.rollout_policy == 'heuristic':
+                move = self._heuristic_move(board, current, legal)
+            else:
+                move = random.choice(legal)
 
-            node = node.best_child()
+            move_type, col = move
+            if move_type == 'drop':
+                board.drop(col, current)
+            elif move_type == 'pop':
+                board.pop(col, current)
 
-        return node
-
-    def _simulate(self, node):
-
-        # The expanded node may itself be a terminal draw (declared via the
-        # ("draw", -1) move). Honor that without rolling out.
-        if node.move is not None and node.move[0] == "draw":
-            return 0
-
-        sim_board = node.board.copy()
-        current_player = node.player_id
-
-        for _ in range(200):
-            winner = sim_board.get_winner()
+            winner = board.get_winner()
             if winner:
                 return winner
 
-            moves = sim_board.get_possible_moves(current_player)
-            if not moves:
-                return 0
+            current = PLAYER2 if current == PLAYER1 else PLAYER1
 
-            move_type, col = self._pick_sim_move(sim_board, current_player, moves)
+        return 0  # draw by move limit
 
-            if move_type == "draw":
-                return 0
-            if move_type == "drop":
-                sim_board.drop(col, current_player)
-            else:
-                sim_board.pop(col, current_player)
+    def _heuristic_move(self, board: Board, player: int, legal: list) -> tuple:
+        """
+        Simple heuristic rollout: prefer moves that immediately win,
+        then moves that block the opponent; otherwise random.
+        """
+        opponent = PLAYER2 if player == PLAYER1 else PLAYER1
 
-            current_player = PLAYER2 if current_player == PLAYER1 else PLAYER1
-
-        return sim_board.get_winner()
-
-    def _pick_sim_move(self, _sim_board, _current_player, moves):
-        return random.choice(moves)
-
-    def _backpropagate(self, node, result):
-
-        while node is not None:
-
-            node.visits += 1
-
-            # FIX: count wins for the player who MADE the move leading to this node,
-            # which is the opponent of node.player_id (who is about to move here).
-            # This makes UCT correct at both friendly and opponent nodes.
-            mover = PLAYER2 if node.player_id == PLAYER1 else PLAYER1
-            if result == mover:
-                node.wins += 1
-
-            node = node.parent
-
-
-
-# =================================
-#     MCTS PLAYER v2 — tree reuse
-# =================================
-
-
-class MCTSPlayerV2(MCTSPlayer):
-    """Identical to MCTSPlayer but reuses the search tree between turns."""
-
-    def __init__(self, player_id, iterations=10000):
-        super().__init__(player_id, iterations)
-        self.root = None
-
-    def _build_root(self, board):
-        return self._find_or_create_root(board)
-
-    def _after_search(self, best_node):
-        self.root = best_node
-        self.root.parent = None
-
-    def _find_or_create_root(self, board):
-
-        current_board_tuple = board.to_tuple()
-
-        if self.root is not None:
-            for child in self.root.children:
-                if child.board.to_tuple() == current_board_tuple:
-                    child.parent = None
-                    return child
-
-        return MCTSNode(board=board.copy(), player_id=self.player_id)
-
-
-# =================================
-#  MCTS PLAYER v3 — smart simulation
-# =================================
-
-
-class MCTSPlayerV3(MCTSPlayer):
-    """Identical to MCTSPlayer but uses a win/block heuristic during rollouts."""
-
-    def _pick_sim_move(self, sim_board, current_player, _moves):
-        return self._pick_smart_move(sim_board, current_player)
-
-    def _pick_smart_move(self, board, current_player):
-        opponent = PLAYER2 if current_player == PLAYER1 else PLAYER1
-        moves = board.get_possible_moves(current_player)
-
-        # 1. Take an immediate win (draw can't win, skip it)
-        for move in moves:
+        # Check for winning move
+        for move in legal:
+            b = board.copy()
             move_type, col = move
-            if move_type == "draw":
-                continue
-            test_board = board.copy()
-            if move_type == "drop":
-                test_board.drop(col, current_player)
+            if move_type == 'drop':
+                b.drop(col, player)
             else:
-                test_board.pop(col, current_player)
-            if test_board.get_winner() == current_player:
+                b.pop(col, player)
+            if b.get_winner() == player:
                 return move
 
-        # 2. Block opponent's winning DROP moves only.
-        # FIX: pop blocking is removed — you cannot pop the opponent's piece
-        # from the bottom row since can_pop checks for your own piece there.
-        opponent_moves = board.get_possible_moves(opponent)
-        for move in opponent_moves:
+        # Check for blocking move
+        for move in legal:
+            b = board.copy()
             move_type, col = move
-            if move_type != "drop":
+            if move_type == 'drop':
+                b.drop(col, player)
+            else:
+                b.pop(col, player)
+            if b.get_winner() == opponent:
+                # This move 'accidentally' lets opponent win → skip
                 continue
-            test_board = board.copy()
-            test_board.drop(col, opponent)
-            if test_board.get_winner() == opponent:
-                block = ("drop", col)
-                if block in moves:
-                    return block
+            # Simulate opponent's best response
+            for opp_move in b.get_legal_moves(opponent):
+                b2 = b.copy()
+                omt, oc = opp_move
+                if omt == 'drop':
+                    b2.drop(oc, opponent)
+                else:
+                    b2.pop(oc, opponent)
+                if b2.get_winner() == opponent:
+                    return move  # block this
 
-        # 3. No immediate win or block needed — play randomly
-        return random.choice(moves)
+        return random.choice(legal)
+
+    # ------------------------------------------------------------------
+    # Backpropagation
+    # ------------------------------------------------------------------
+    def _backpropagate(self, node: MCTSNode, result: int, root_player: int):
+        """
+        Walk back up the tree updating visit counts and wins.
+
+        Wins are accumulated from the perspective of the player who
+        moved into each node (i.e., the *parent's* current_player).
+        """
+        while node is not None:
+            node.visits += 1
+            if result == 0:
+                node.wins += 0.5  # draw
+            elif node.parent is not None:
+                # The player who made the move to reach this node
+                mover = node.parent.current_player
+                if result == mover:
+                    node.wins += 1.0
+            else:
+                # Root node: reward from root_player's perspective
+                if result == root_player:
+                    node.wins += 1.0
+            node = node.parent
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    def _apply_move_to_board(self, board: Board, move: tuple, player: int):
+        """Apply move to board and return (new_board, next_player)."""
+        move_type, col = move
+        if move_type == 'drop':
+            board.drop(col, player)
+        elif move_type == 'pop':
+            board.pop(col, player)
+        next_player = PLAYER2 if player == PLAYER1 else PLAYER1
+        return board, next_player
+
+    def _is_terminal_board(self, board: Board, player: int) -> bool:
+        """Return True if the board is in a terminal state."""
+        if board.get_winner():
+            return True
+        if board.is_full():
+            return True
+        if not board.get_legal_moves(player):
+            return True
+        return False
 
 
-# =================================
-#  MCTS PLAYER v4 — max-wins selection
-# =================================
-
-
-class MCTSPlayerV4(MCTSPlayer):
-    """Identical to MCTSPlayer but selects the final move by win count
-    (winrate * visits = wins) instead of visit count."""
-
-    def _select_final_move(self, root):
-        return max(root.children, key=lambda c: c.wins)
-
-
-# =================================
-#  MCTS PLAYER v5 — tree reuse + max-wins selection
-# =================================
-
-
-class MCTSPlayerV5(MCTSPlayerV2):
-    """Tree reuse (V2) with max-wins final selection instead of max-visits."""
-
-    def _select_final_move(self, root):
-        return max(root.children, key=lambda c: c.wins)
-
-
-# =================================
-#  MCTS PLAYER v6 — smart simulation + max-wins selection
-# =================================
-
-
-class MCTSPlayerV6(MCTSPlayerV3):
-    """Smart simulation (V3) with max-wins final selection instead of max-visits."""
-
-    def _select_final_move(self, root):
-        return max(root.children, key=lambda c: c.wins)
 

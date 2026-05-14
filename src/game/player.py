@@ -2,10 +2,8 @@
 #             IMPORTS
 # =================================
 
-import math
 import random
-import pandas as pd
-from .board import SYMBOLS, PLAYER1, PLAYER2, COLS
+from .board import SYMBOLS, PLAYER1, PLAYER2
 
 # =================================
 #          PLAYER CLASSES
@@ -126,6 +124,40 @@ class RandomPlayer(Player):
 
         return move
 
+# =================================
+#          MCTS PLAYER
+# =================================
+
+class MCTSPlayer:
+    """
+    Player that uses Monte Carlo Tree Search (UCT) to choose a move.
+
+    Parameters
+    ----------
+    iterations : int
+        Number of MCTS simulation iterations per move.
+    exploration_constant : float
+        UCT exploration constant (c in the UCB1 formula).
+    max_children : int or None
+        Maximum children to expand per node. None means expand all.
+    """
+
+    def __init__(self, iterations: int = 1000, exploration_constant: float = 1.414,
+                 max_children: int = None, rollout_policy: str = 'random'):
+        self.iterations = iterations
+        self.exploration_constant = exploration_constant
+        self.max_children = max_children
+        self.rollout_policy = rollout_policy
+
+    def choose_move(self, game):
+        from ..mcts import MCTS
+        mcts = MCTS(
+            iterations=self.iterations,
+            exploration_constant=self.exploration_constant,
+            max_children=self.max_children,
+            rollout_policy=self.rollout_policy,
+        )
+        return mcts.search(game)
 
 # =================================
 #      DECISSION TREE PLAYER
@@ -168,29 +200,3 @@ class DecisionTreePlayer(Player):
         print(f"\n DecisionTreePlayer-{self.symbol} fallback plays: {move}")
 
         return move
-
-
-# Re-export MCTS classes and node for convenience
-from ..mcts.node import MCTSNode
-from ..mcts.mcts import (
-    MCTSPlayer,
-    MCTSPlayerV2,
-    MCTSPlayerV3,
-    MCTSPlayerV4,
-    MCTSPlayerV5,
-    MCTSPlayerV6,
-)
-
-__all__ = [
-    "Player",
-    "HumanPlayer",
-    "RandomPlayer",
-    "DecisionTreePlayer",
-    "MCTSNode",
-    "MCTSPlayer",
-    "MCTSPlayerV2",
-    "MCTSPlayerV3",
-    "MCTSPlayerV4",
-    "MCTSPlayerV5",
-    "MCTSPlayerV6",
-]

@@ -232,4 +232,3 @@ class ID3:
             print(f"{prefix}{branch}{name}?")
             for val, child in node.children.items():
                 self.print_tree(child, prefix + "    ", f"={val}: ")
-

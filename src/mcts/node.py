@@ -1,9 +1,12 @@
 """
 MCTS Node used by the Monte Carlo Tree Search algorithm.
 """
+
 import math
 
 from ..game.board import COLS, PLAYER1, PLAYER2
+
+
 class MCTSNode:
 
     def __init__(
@@ -83,4 +86,3 @@ class MCTSNode:
         self.children.append(child)
 
         return child
-

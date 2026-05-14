@@ -1,4 +1,3 @@
-
 class DecisionNode:
 
     def __init__(self, attribute=None, threshold=None, label=None, is_numerical=False):
@@ -11,4 +10,3 @@ class DecisionNode:
     @property
     def is_leaf(self):
         return self.label is not None
-
