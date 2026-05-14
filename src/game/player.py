@@ -3,6 +3,7 @@
 # =================================
 
 import random
+from types import SimpleNamespace
 from .board import SYMBOLS, PLAYER1, PLAYER2
 from ..mcts.mcts import MCTS
 
@@ -153,13 +154,26 @@ class MCTSPlayer:
         self.rollout_policy = rollout_policy
 
     def get_move(self, game):
+        # Accept either a Game-like object or a Board instance for compatibility
         mcts = MCTS(
             iterations=self.iterations,
             exploration_constant=self.exploration_constant,
             max_children=self.max_children,
             rollout_policy=self.rollout_policy,
         )
-        return mcts.search(game)
+
+        # If a full game object is provided (has board/current_player/get_possible_moves), use it.
+        if hasattr(game, "board") and hasattr(game, "current_player") and hasattr(game, "get_possible_moves"):
+            return mcts.search(game)
+
+        # Otherwise assume a Board was passed (Game.play passes only the board).
+        board = game
+        wrapper = SimpleNamespace(
+            board=board,
+            current_player=self.player_id,
+            get_possible_moves=lambda: board.get_possible_moves(self.player_id),
+        )
+        return mcts.search(wrapper)
 
 # =================================
 #      DECISSION TREE PLAYER

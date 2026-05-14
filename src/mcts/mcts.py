@@ -57,10 +57,10 @@ class MCTS:
         if not legal_moves:
             return ('draw', -1)
 
-        # Build the root node
+        # Build the root node (pass Board and player_id to node implementation)
         root = MCTSNode(
-            state_tuple=board_copy.to_tuple(),
-            current_player=current_player,
+            board=board_copy,
+            player_id=current_player,
             untried_moves=list(legal_moves),
         )
 
@@ -100,8 +100,8 @@ class MCTS:
         new_board, new_player = self._apply_move_to_board(board.copy(), move, player)
         legal = new_board.get_possible_moves(new_player)
         child = MCTSNode(
-            state_tuple=new_board.to_tuple(),
-            current_player=new_player,
+            board=new_board,
+            player_id=new_player,
             move=move,
             parent=node,
             untried_moves=legal,

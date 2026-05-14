@@ -10,7 +10,13 @@ from ..game.board import COLS, PLAYER1, PLAYER2
 class MCTSNode:
 
     def __init__(
-        self, board, player_id, move=None, parent=None, exploration=math.sqrt(2)
+        self,
+        board,
+        player_id,
+        move=None,
+        parent=None,
+        exploration=math.sqrt(2),
+        untried_moves=None,
     ):
 
         self.board = board
@@ -21,7 +27,10 @@ class MCTSNode:
         self.wins = 0
         self.visits = 0
         self.children = []
-        self.untried_moves = board.get_possible_moves(player_id)
+        # Allow callers to supply an explicit untried_moves list (used by MCTS.search)
+        self.untried_moves = (
+            list(untried_moves) if untried_moves is not None else board.get_possible_moves(player_id)
+        )
         self.exploration = exploration
 
     def is_fully_expanded(self):
