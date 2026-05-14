@@ -3,17 +3,9 @@
 # =================================
 
 import csv
-import itertools
 import os
 from src.game.board import Board, PLAYER1, PLAYER2
-from src.game.player import (
-    MCTSPlayer,
-    MCTSPlayerV2,
-    MCTSPlayerV3,
-    MCTSPlayerV4,
-    MCTSPlayerV5,
-    MCTSPlayerV6,
-)
+from src.game.player import MCTSPlayer
 
 # =================================
 #         DATASET GENERATOR
@@ -21,16 +13,7 @@ from src.game.player import (
 
 OUTPUT_PATH = "data/dataset.csv"
 NUM_GAMES = 200
-MCTS_ITERATIONS = 5000
-
-PLAYER_CLASSES = [
-    MCTSPlayer,
-    MCTSPlayerV2,
-    MCTSPlayerV3,
-    MCTSPlayerV4,
-    MCTSPlayerV5,
-    MCTSPlayerV6,
-]
+MCTS_ITERATIONS = 100
 
 
 def simulate_game(player1, player2):
@@ -66,28 +49,25 @@ def simulate_game(player1, player2):
         # Samples from both players
         samples.append((state, move_type, col))
 
-        current_player, other_player = other_player, current_player
+        current_player = other_player
+        other_player = current_player
 
     return samples
 
 
-def generate_dataset(
-    num_games=NUM_GAMES, output_path=OUTPUT_PATH, iterations=MCTS_ITERATIONS
-):
+def generate_dataset(num_games=NUM_GAMES, output_path=OUTPUT_PATH):
 
     # Simulate num_games games and save (state, move_type, col) to CSV.
-    # Each game cycles through all MCTS player class combinations so the
-    # dataset captures diverse strategies.
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    player1 = MCTSPlayer(PLAYER1, iterations=MCTS_ITERATIONS)
+    player2 = MCTSPlayer(PLAYER2, iterations=MCTS_ITERATIONS)
 
     # CSV header: 42 cells (6x7 board) + move_type + col
     header = [f"cell_{i}" for i in range(42)] + ["move_type", "col"]
 
     total_samples = 0
-    # Cycle through every ordered pair of player classes so all matchups and
-    # PLAYER1/PLAYER2 role assignments are covered across games.
-    pair_cycle = itertools.cycle(itertools.permutations(PLAYER_CLASSES, 2))
 
     with open(output_path, "w", newline="") as f:
 
@@ -96,15 +76,7 @@ def generate_dataset(
 
         for game_num in range(1, num_games + 1):
 
-            cls1, cls2 = next(pair_cycle)
-
-            player1 = cls1(PLAYER1, iterations=iterations)
-            player2 = cls2(PLAYER2, iterations=iterations)
-
-            print(
-                f"Game {game_num}/{num_games}: "
-                f"{cls1.__name__} vs {cls2.__name__}..."
-            )
+            print(f"Simulating game {game_num}/{num_games}...")
             samples = simulate_game(player1, player2)
 
             for state, move_type, col in samples:
