@@ -7,6 +7,10 @@ import random
 import pandas as pd
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2, COLS
 from src.game.decision_tree_player import PopOutID3
+try:
+    from src.game.fast_mcts import parallel_root_monte_carlo
+except Exception:
+    parallel_root_monte_carlo = None
 
 # =================================
 #          PLAYER CLASSES
@@ -241,6 +245,16 @@ class MCTSPlayer(Player):
         return True
 
     def get_move(self, board):
+        # Use fast parallel Monte Carlo backend only for sufficiently large budgets
+        if parallel_root_monte_carlo is not None and self.iterations >= 128:
+            try:
+                procs = max(1, min(8, (self.iterations // 250) or 1))
+                move = parallel_root_monte_carlo(board, self.player_id, iterations=self.iterations, processes=procs)
+                print(f"\n {self.__class__.__name__}-{self.symbol} plays: {move}")
+                return move
+            except Exception:
+                # fallback to original MCTS on any error
+                pass
 
         root = self._build_root(board)
 
