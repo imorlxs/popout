@@ -13,9 +13,7 @@ class DecisionTreeNode:
     nodes.
     """
 
-    def __init__(
-        self, attribute=None, threshold=None, label=None, majority_label=None
-    ):
+    def __init__(self, attribute=None, threshold=None, label=None, majority_label=None):
         """
         Parameters
         ----------

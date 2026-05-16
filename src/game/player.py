@@ -4,7 +4,6 @@
 
 import math
 import random
-import pandas as pd
 from src.game.board import SYMBOLS, PLAYER1, PLAYER2, COLS
 
 # =================================

@@ -7,7 +7,7 @@ import itertools
 import os
 import concurrent.futures
 import random
-from src.game.board import Board, PLAYER1, PLAYER2
+from src.game.board import Board
 from src.game.player import (
     MCTSPlayer,
     MCTSPlayerV2,
