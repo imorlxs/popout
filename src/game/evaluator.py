@@ -73,6 +73,7 @@ def _play_one_game(player1, player2, max_moves=300):
 #         MATCH RUNNER
 # =================================
 
+
 def play_match(player1, player2, num_games=20):
     """
     Play num_games between two already-constructed players.
@@ -145,14 +146,16 @@ def evaluate_mcts(num_games=10, iterations=500):
             p2 = cls2(PLAYER2, iterations=iterations)
             res = play_match(p1, p2, num_games)
 
-            matchups.append({
-                "p1_name": n1,
-                "p2_name": n2,
-                "p1_wins": res["p1_wins"],
-                "draws": res["draws"],
-                "p2_wins": res["p2_wins"],
-                "p1_winrate": res["p1_winrate"],
-            })
+            matchups.append(
+                {
+                    "p1_name": n1,
+                    "p2_name": n2,
+                    "p1_wins": res["p1_wins"],
+                    "draws": res["draws"],
+                    "p2_wins": res["p2_wins"],
+                    "p1_winrate": res["p1_winrate"],
+                }
+            )
 
             win_matrix[n1][n2] = res["p1_wins"]
 
@@ -167,8 +170,10 @@ def evaluate_mcts(num_games=10, iterations=500):
             totals[n2]["games"] += num_games
 
     ranking = sorted(
-        [{"player": n, **t, "winrate": round(t["wins"] / t["games"], 3)}
-         for n, t in totals.items()],
+        [
+            {"player": n, **t, "winrate": round(t["wins"] / t["games"], 3)}
+            for n, t in totals.items()
+        ],
         key=lambda r: r["winrate"],
         reverse=True,
     )
@@ -183,6 +188,7 @@ def evaluate_mcts(num_games=10, iterations=500):
 # =================================
 #     DECISION TREE ACCURACY
 # =================================
+
 
 def evaluate_tree_accuracy(csv_path="data/dataset.csv", test_ratio=0.2, seed=42):
     """
@@ -226,15 +232,16 @@ def evaluate_tree_accuracy(csv_path="data/dataset.csv", test_ratio=0.2, seed=42)
 #   DECISION TREE PLAYER VS MCTS
 # =================================
 
+
 def evaluate_tree_player(csv_path="data/dataset.csv", num_games=20, iterations=1000):
     """
     Pit DecisionTreePlayer against each MCTS variant.
     Returns a list of result dicts.
     """
     opponents = [
-        (MCTSPlayer,    "vs V1  (random sim)"),
-        (MCTSPlayerV3,  "vs V3  (smart sim)"),
-        (MCTSPlayerV6,  "vs V6  (smart sim + max-wins)"),
+        (MCTSPlayer, "vs V1  (random sim)"),
+        (MCTSPlayerV3, "vs V3  (smart sim)"),
+        (MCTSPlayerV6, "vs V6  (smart sim + max-wins)"),
     ]
 
     results = []
