@@ -7,6 +7,7 @@ import math
 import pytest
 from src.game.board import Board, PLAYER1, PLAYER2, SYMBOLS
 from src.game.player import (
+    DecisionTreePlayer,
     HumanPlayer,
     MCTSNode,
     MCTSPlayer,
@@ -82,7 +83,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["drop", "0"])
+        inputs = iter(["d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -93,12 +94,11 @@ class TestHumanPlayerInitialization:
         assert isinstance(move[1], int)
 
     def test_human_player_get_move_invalid_column_then_valid(self, monkeypatch):
-        """Test HumanPlayer.get_move retries when column input
-        is not a number."""
+        """Test HumanPlayer.get_move retries when column input is not a number."""
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["drop", "asdfdf", "drop", "0"])
+        inputs = iter(["dasdfdf", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -109,7 +109,7 @@ class TestHumanPlayerInitialization:
         player = HumanPlayer(PLAYER1)
         board = Board()
 
-        inputs = iter(["jsdfjdsjf", "0", "drop", "0"])
+        inputs = iter(["j0", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -124,7 +124,18 @@ class TestHumanPlayerInitialization:
             board, "get_possible_moves", lambda _player_id: [("drop", 0)]
         )
 
-        inputs = iter(["drop", "1", "drop", "0"])
+        inputs = iter(["d1", "d0"])
+        monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+
+        move = player.get_move(board)
+        assert move == ("drop", 0)
+
+    def test_human_player_get_move_out_of_range_column_then_valid(self, monkeypatch):
+        """Test HumanPlayer.get_move retries when column is out of range."""
+        player = HumanPlayer(PLAYER1)
+        board = Board()
+
+        inputs = iter(["d7", "d0"])
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
         move = player.get_move(board)
@@ -214,6 +225,36 @@ class TestRandomPlayerGetMove:
         monkeypatch.setattr("random.choice", lambda moves: ("pop", 0))
         move = player.get_move(board)
         assert move == ("pop", 0)
+
+
+# =================================
+#      DECISION TREE PLAYER TESTS
+# =================================
+
+
+class _StubTree:
+    def __init__(self, prediction):
+        self.prediction = prediction
+
+    def predict(self, _features):
+        return self.prediction
+
+
+class TestDecisionTreePlayerInit:
+    def test_init_sets_player_state_and_default_fallback(self):
+        player = DecisionTreePlayer(PLAYER1, _StubTree(("drop", 0)))
+
+        assert isinstance(player, Player)
+        assert player.player_id == PLAYER1
+        assert player.symbol == SYMBOLS[PLAYER1]
+        assert isinstance(player.fallback, RandomPlayer)
+        assert player.fallback.player_id == PLAYER1
+
+    def test_init_uses_custom_fallback_when_provided(self):
+        fallback = RandomPlayer(PLAYER2)
+        player = DecisionTreePlayer(PLAYER1, _StubTree(("drop", 0)), fallback=fallback)
+
+        assert player.fallback is fallback
 
 
 # =================================

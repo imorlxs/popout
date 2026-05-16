@@ -25,7 +25,14 @@ OUTPUT_PATH = "data/dataset.csv"
 NUM_GAMES = 800
 MCTS_ITERATIONS = 10000
 
-PLAYER_CLASSES = [MCTSPlayer, MCTSPlayer]
+PLAYER_CLASSES = [
+    MCTSPlayer,
+    MCTSPlayerV2,
+    MCTSPlayerV3,
+    MCTSPlayerV4,
+    MCTSPlayerV5,
+    MCTSPlayerV6,
+]
 
 
 def _simulate_game_task(cls1_name, cls2_name, iterations):
