@@ -468,8 +468,8 @@ class DecisionTreePlayer:
         try:
             prediction = self.tree.predict(features)
             # prediction is expected to be (move_type, col) or a string 'type_col'
-            if isinstance(prediction, str) and '_' in prediction:
-                parts = prediction.split('_')
+            if isinstance(prediction, str) and "_" in prediction:
+                parts = prediction.split("_")
                 move_type = parts[0]
                 col = int(parts[1])
                 move = (move_type, col)

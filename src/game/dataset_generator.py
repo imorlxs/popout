@@ -25,10 +25,7 @@ OUTPUT_PATH = "data/dataset.csv"
 NUM_GAMES = 800
 MCTS_ITERATIONS = 10000
 
-PLAYER_CLASSES = [
-    MCTSPlayer,
-    MCTSPlayer
-]
+PLAYER_CLASSES = [MCTSPlayer, MCTSPlayer]
 
 
 def _simulate_game_task(cls1_name, cls2_name, iterations):
@@ -130,7 +127,9 @@ def generate_dataset(
 
                 try:
                     samples = future.result()
-                    print(f"Game {game_num}/{num_games}: {c1} vs {c2}... done ({len(samples)} samples)")
+                    print(
+                        f"Game {game_num}/{num_games}: {c1} vs {c2}... done ({len(samples)} samples)"
+                    )
 
                     for state, move_type, col in samples:
                         writer.writerow(state + [move_type, col])

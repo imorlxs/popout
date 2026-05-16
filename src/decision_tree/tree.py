@@ -34,14 +34,14 @@ class DecisionTreeNode:
     def is_leaf(self) -> bool:
         return self.label is not None
 
-    def add_child(self, value, node: 'DecisionTreeNode'):
+    def add_child(self, value, node: "DecisionTreeNode"):
         self.children[value] = node
 
     # ------------------------------------------------------------------
     # Pretty-print helpers
     # ------------------------------------------------------------------
     def _to_str(self, indent: int = 0, feature_names: list = None) -> str:
-        pad = '  ' * indent
+        pad = "  " * indent
         if self.is_leaf:
             return f"{pad}→ {self.label}\n"
 
@@ -63,7 +63,7 @@ class DecisionTreeNode:
             lines.append(f"{pad}  {branch_label}:\n")
             lines.append(child._to_str(indent + 2, feature_names))
 
-        return ''.join(lines)
+        return "".join(lines)
 
     def display(self, feature_names: list = None):
         """Print the tree to stdout."""
