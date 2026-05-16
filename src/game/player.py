@@ -452,7 +452,7 @@ class MCTSPlayerV6(MCTSPlayerV3):
 # =================================
 
 
-class DecisionTreePlayer:
+class DecisionTreePlayer(Player):
     """
     Player that uses a trained ID3 decision tree to choose a move.
 
@@ -465,9 +465,10 @@ class DecisionTreePlayer:
         Defaults to RandomPlayer.
     """
 
-    def __init__(self, tree, fallback=None):
+    def __init__(self, player_id, tree, fallback=None):
+        super().__init__(player_id)
         self.tree = tree
-        self.fallback = fallback or RandomPlayer()
+        self.fallback = fallback or RandomPlayer(player_id)
 
     def get_move(self, board):
         # Encode the board as a feature vector
