@@ -5,6 +5,8 @@
 import csv
 import itertools
 import os
+import concurrent.futures
+import random
 from src.game.board import Board, PLAYER1, PLAYER2
 from src.game.player import (
     MCTSPlayer,
@@ -20,17 +22,31 @@ from src.game.player import (
 # =================================
 
 OUTPUT_PATH = "data/dataset.csv"
-NUM_GAMES = 200
-MCTS_ITERATIONS = 5000
+NUM_GAMES = 800
+MCTS_ITERATIONS = 10000
 
 PLAYER_CLASSES = [
     MCTSPlayer,
-    MCTSPlayerV2,
-    MCTSPlayerV3,
-    MCTSPlayerV4,
-    MCTSPlayerV5,
-    MCTSPlayerV6,
+    MCTSPlayer
 ]
+
+
+def _simulate_game_task(cls1_name, cls2_name, iterations):
+
+    # Worker function run in subprocess: import player classes by name
+    from src.game.player import PLAYER1, PLAYER2
+
+    mod = __import__("src.game.player", fromlist=[cls1_name, cls2_name])
+    cls1 = getattr(mod, cls1_name)
+    cls2 = getattr(mod, cls2_name)
+
+    # Seed randomness in worker to reduce identical rollouts
+    random.seed()
+
+    player1 = cls1(PLAYER1, iterations=iterations)
+    player2 = cls2(PLAYER2, iterations=iterations)
+
+    return simulate_game(player1, player2)
 
 
 def simulate_game(player1, player2):
@@ -94,23 +110,34 @@ def generate_dataset(
         writer = csv.writer(f)
         writer.writerow(header)
 
+        # Build task list (class names) for each game so workers can import classes
+        games = []
         for game_num in range(1, num_games + 1):
-
             cls1, cls2 = next(pair_cycle)
+            games.append((game_num, cls1.__name__, cls2.__name__))
 
-            player1 = cls1(PLAYER1, iterations=iterations)
-            player2 = cls2(PLAYER2, iterations=iterations)
+        # Run games in parallel using processes and write results as they arrive
+        with concurrent.futures.ProcessPoolExecutor() as executor:
 
-            print(
-                f"Game {game_num}/{num_games}: "
-                f"{cls1.__name__} vs {cls2.__name__}..."
-            )
-            samples = simulate_game(player1, player2)
+            future_to_meta = {
+                executor.submit(_simulate_game_task, c1, c2, iterations): (num, c1, c2)
+                for num, c1, c2 in games
+            }
 
-            for state, move_type, col in samples:
+            for future in concurrent.futures.as_completed(future_to_meta):
 
-                writer.writerow(state + [move_type, col])
-                total_samples += 1
+                game_num, c1, c2 = future_to_meta[future]
+
+                try:
+                    samples = future.result()
+                    print(f"Game {game_num}/{num_games}: {c1} vs {c2}... done ({len(samples)} samples)")
+
+                    for state, move_type, col in samples:
+                        writer.writerow(state + [move_type, col])
+                        total_samples += 1
+
+                except Exception as e:
+                    print(f"Game {game_num} ({c1} vs {c2}) failed: {e}")
 
     print(f"\nDataset generated: {total_samples} samples from {num_games} games")
     print(f"Saved to: {output_path}")
