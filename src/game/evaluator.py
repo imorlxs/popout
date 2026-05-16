@@ -16,7 +16,7 @@ from src.game.player import (
     MCTSPlayerV6,
     DecisionTreePlayer,
 )
-from src.game.decision_tree_player import PopOutID3
+from src.decision_tree.id3 import ID3DecisionTree
 
 # =================================
 #         SILENT GAME RUNNER
@@ -214,7 +214,7 @@ def evaluate_tree_accuracy(csv_path="data/dataset.csv", test_ratio=0.2, seed=42)
     X_train, y_train = to_Xy(train_rows)
     X_test, y_test = to_Xy(test_rows)
 
-    tree = PopOutID3()
+    tree = ID3DecisionTree(max_depth=15, min_samples_split=5)
     tree.fit(X_train, y_train)
 
     correct = sum(tree.predict(x) == y for x, y in zip(X_test, y_test))
@@ -236,8 +236,20 @@ def evaluate_tree_accuracy(csv_path="data/dataset.csv", test_ratio=0.2, seed=42)
 def evaluate_tree_player(csv_path="data/dataset.csv", num_games=20, iterations=1000):
     """
     Pit DecisionTreePlayer against each MCTS variant.
+    Trains an ID3DecisionTree on the full dataset once, then reuses it.
     Returns a list of result dicts.
     """
+    import csv as csv_mod
+
+    with open(csv_path, newline="") as f:
+        rows = list(csv_mod.DictReader(f))
+
+    X = [[int(r[f"cell_{i}"]) for i in range(42)] for r in rows]
+    y = [f"{r['move_type']}_{r['col']}" for r in rows]
+
+    tree = ID3DecisionTree(max_depth=15, min_samples_split=5)
+    tree.fit(X, y)
+
     opponents = [
         (MCTSPlayer, "vs V1  (random sim)"),
         (MCTSPlayerV3, "vs V3  (smart sim)"),
@@ -248,7 +260,7 @@ def evaluate_tree_player(csv_path="data/dataset.csv", num_games=20, iterations=1
 
     for mcts_cls, label in opponents:
         print(f"\nDecisionTreePlayer {label}")
-        dt = DecisionTreePlayer(PLAYER1, csv_path=csv_path)
+        dt = DecisionTreePlayer(PLAYER1, tree=tree)
         mcts = mcts_cls(PLAYER2, iterations=iterations)
         res = play_match(dt, mcts, num_games)
         res["matchup"] = f"DecisionTreePlayer {label}"
