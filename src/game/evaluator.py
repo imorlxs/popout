@@ -105,32 +105,79 @@ def play_match(player1, player2, num_games=20):
 #       MCTS HEAD-TO-HEAD
 # =================================
 
-MATCHUPS = [
-    (MCTSPlayer,   MCTSPlayerV3,  "V1 vs V3  — random vs smart simulation"),
-    (MCTSPlayer,   MCTSPlayerV4,  "V1 vs V4  — max-visits vs max-wins selection"),
-    (MCTSPlayerV2, MCTSPlayerV5,  "V2 vs V5  — tree reuse: visits vs wins"),
-    (MCTSPlayerV3, MCTSPlayerV6,  "V3 vs V6  — smart sim: visits vs wins"),
-    (MCTSPlayerV3, MCTSPlayerV5,  "V3 vs V5  — smart sim vs tree-reuse+wins"),
-    (MCTSPlayerV6, MCTSPlayerV2,  "V6 vs V2  — best combined vs pure tree reuse"),
+MCTS_CLASSES = [
+    MCTSPlayer,
+    MCTSPlayerV2,
+    MCTSPlayerV3,
+    MCTSPlayerV4,
+    MCTSPlayerV5,
+    MCTSPlayerV6,
 ]
 
 
-def evaluate_mcts(num_games=20, iterations=1000):
+def evaluate_mcts(num_games=10, iterations=500):
     """
-    Run all key MCTS matchups.
-    Returns a list of result dicts ready for display as a table.
+    Round-robin tournament: every MCTS class plays every other class.
+    Each ordered pair (P1, P2) plays num_games, so every pair appears twice
+    (once with each class as P1) — this neutralises first-player advantage.
+
+    Returns a dict:
+        {
+            "matchups":      list of per-matchup dicts (p1_name, p2_name, p1_wins, draws, p2_wins),
+            "win_matrix":    {row_class: {col_class: wins_when_row_is_p1_vs_col}},
+            "totals":        list of dicts ranked by total wins across all games played,
+        }
     """
-    results = []
+    names = [c.__name__ for c in MCTS_CLASSES]
+    matchups = []
+    win_matrix = {name: dict.fromkeys(names, 0) for name in names}
+    totals = {name: {"wins": 0, "draws": 0, "losses": 0, "games": 0} for name in names}
 
-    for cls1, cls2, label in MATCHUPS:
-        print(f"\n{label}")
-        p1 = cls1(PLAYER1, iterations=iterations)
-        p2 = cls2(PLAYER2, iterations=iterations)
-        res = play_match(p1, p2, num_games)
-        res["matchup"] = label
-        results.append(res)
+    for cls1 in MCTS_CLASSES:
+        for cls2 in MCTS_CLASSES:
+            if cls1 is cls2:
+                continue
 
-    return results
+            n1, n2 = cls1.__name__, cls2.__name__
+            print(f"\n{n1} (P1) vs {n2} (P2)")
+
+            p1 = cls1(PLAYER1, iterations=iterations)
+            p2 = cls2(PLAYER2, iterations=iterations)
+            res = play_match(p1, p2, num_games)
+
+            matchups.append({
+                "p1_name": n1,
+                "p2_name": n2,
+                "p1_wins": res["p1_wins"],
+                "draws": res["draws"],
+                "p2_wins": res["p2_wins"],
+                "p1_winrate": res["p1_winrate"],
+            })
+
+            win_matrix[n1][n2] = res["p1_wins"]
+
+            totals[n1]["wins"] += res["p1_wins"]
+            totals[n1]["losses"] += res["p2_wins"]
+            totals[n1]["draws"] += res["draws"]
+            totals[n1]["games"] += num_games
+
+            totals[n2]["wins"] += res["p2_wins"]
+            totals[n2]["losses"] += res["p1_wins"]
+            totals[n2]["draws"] += res["draws"]
+            totals[n2]["games"] += num_games
+
+    ranking = sorted(
+        [{"player": n, **t, "winrate": round(t["wins"] / t["games"], 3)}
+         for n, t in totals.items()],
+        key=lambda r: r["winrate"],
+        reverse=True,
+    )
+
+    return {
+        "matchups": matchups,
+        "win_matrix": win_matrix,
+        "totals": ranking,
+    }
 
 
 # =================================
