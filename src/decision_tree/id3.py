@@ -281,6 +281,11 @@ class ID3DecisionTree:
         -------
         dict with keys 'accuracy', 'correct', 'total'.
         """
+        if len(X) != len(y):
+            raise ValueError(
+                f"X and y must have the same number of samples; got {len(X)} and {len(y)}."
+            )
+
         predictions = self.predict_batch(X)
         correct = sum(p == t for p, t in zip(predictions, y))
         total = len(y)
