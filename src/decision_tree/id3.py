@@ -91,7 +91,11 @@ class ID3DecisionTree:
         if best_gain <= 0:
             return DecisionTreeNode(label=label_counts.most_common(1)[0][0])
 
-        node = DecisionTreeNode(attribute=best_attr, threshold=best_threshold)
+        node = DecisionTreeNode(
+            attribute=best_attr,
+            threshold=best_threshold,
+            majority_label=label_counts.most_common(1)[0][0],
+        )
 
         if best_threshold is not None:
             # Binary split for continuous attribute
@@ -252,7 +256,9 @@ class ID3DecisionTree:
             branch_value = x[attr]
 
         if branch_value not in node.children:
-            # Unseen value at prediction time → pick most common child
+            # Unseen value at prediction time → use training majority at this node
+            if node.majority_label is not None:
+                return node.majority_label
             if node.children:
                 child = next(iter(node.children.values()))
                 return self._traverse(child, x)
