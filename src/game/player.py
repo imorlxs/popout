@@ -467,7 +467,7 @@ class DecisionTreePlayer(Player):
     def __init__(self, player_id, tree, fallback=None):
         super().__init__(player_id)
         self.tree = tree
-        self.fallback = fallback or RandomPlayer(player_id)
+        self.fallback = fallback or RandomPlayer(self.player_id)
 
     def get_move(self, board):
         # Encode the board as a feature vector
@@ -476,14 +476,12 @@ class DecisionTreePlayer(Player):
 
         try:
             prediction = self.tree.predict(features)
-            # prediction is expected to be (move_type, col) or a string 'type_col'
+            # prediction is expected to be a string 'type_col'
             if isinstance(prediction, str) and "_" in prediction:
                 parts = prediction.split("_")
                 move_type = parts[0]
                 col = int(parts[1])
                 move = (move_type, col)
-            else:
-                move = prediction
 
             legal = board.get_possible_moves(self.player_id)
             if move in legal:
@@ -492,4 +490,5 @@ class DecisionTreePlayer(Player):
             pass
 
         # Fallback if tree predicts an illegal move
+        print("DecisionTreePlayer: Tree prediction invalid or illegal, using fallback.")
         return self.fallback.get_move(board)

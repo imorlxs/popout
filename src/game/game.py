@@ -96,3 +96,5 @@ class Game:
             print(f"\n Player {SYMBOLS[winner]} wins!")
         else:
             print("\n It's a draw!")
+
+        return winner
