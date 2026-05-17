@@ -35,11 +35,18 @@ class ID3DecisionTree:
         Optional names for features (used for display).
     """
 
-    def __init__(self, max_depth=None, min_samples_split: int = 2,
-                 continuous_features=None, feature_names=None):
+    def __init__(
+        self,
+        max_depth=None,
+        min_samples_split: int = 2,
+        continuous_features=None,
+        feature_names=None,
+    ):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
-        self.continuous_features = set(continuous_features) if continuous_features else set()
+        self.continuous_features = (
+            set(continuous_features) if continuous_features else set()
+        )
         self.feature_names = feature_names
         self.root = None
 
@@ -93,12 +100,12 @@ class ID3DecisionTree:
             )
             remaining = [a for a in attributes if a != best_attr]
 
-            for branch_value, sub_X, sub_y in [(True, left_X, left_y),
-                                                (False, right_X, right_y)]:
+            for branch_value, sub_X, sub_y in [
+                (True, left_X, left_y),
+                (False, right_X, right_y),
+            ]:
                 if not sub_X:
-                    child = DecisionTreeNode(
-                        label=label_counts.most_common(1)[0][0]
-                    )
+                    child = DecisionTreeNode(label=label_counts.most_common(1)[0][0])
                 else:
                     child = self._build(sub_X, sub_y, remaining, depth + 1)
                 node.add_child(branch_value, child)
@@ -110,9 +117,7 @@ class ID3DecisionTree:
                 sub_X = [row for row in X if row[best_attr] == value]
                 sub_y = [y[i] for i, row in enumerate(X) if row[best_attr] == value]
                 if not sub_X:
-                    child = DecisionTreeNode(
-                        label=label_counts.most_common(1)[0][0]
-                    )
+                    child = DecisionTreeNode(label=label_counts.most_common(1)[0][0])
                 else:
                     child = self._build(sub_X, sub_y, remaining, depth + 1)
                 node.add_child(value, child)
@@ -150,8 +155,7 @@ class ID3DecisionTree:
         best_gain = -1
 
         # Candidate thresholds: midpoints between consecutive unique values
-        thresholds = [(values[i] + values[i + 1]) / 2.0
-                      for i in range(len(values) - 1)]
+        thresholds = [(values[i] + values[i + 1]) / 2.0 for i in range(len(values) - 1)]
 
         for threshold in thresholds:
             left_y = [y[i] for i, row in enumerate(X) if row[attr] <= threshold]
@@ -160,8 +164,8 @@ class ID3DecisionTree:
                 continue
             n = len(y)
             gain = base_entropy - (
-                len(left_y) / n * self._entropy(left_y) +
-                len(right_y) / n * self._entropy(right_y)
+                len(left_y) / n * self._entropy(left_y)
+                + len(right_y) / n * self._entropy(right_y)
             )
             if gain > best_gain:
                 best_gain = gain
@@ -281,7 +285,7 @@ class ID3DecisionTree:
         correct = sum(p == t for p, t in zip(predictions, y))
         total = len(y)
         return {
-            'accuracy': correct / total if total > 0 else 0.0,
-            'correct': correct,
-            'total': total,
+            "accuracy": correct / total if total > 0 else 0.0,
+            "correct": correct,
+            "total": total,
         }

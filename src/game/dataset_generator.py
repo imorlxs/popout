@@ -103,7 +103,12 @@ def generate_dataset(
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # CSV header: 42 cells (6x7 board) + current_player + move_type + col + label
-    header = [f"cell_{i}" for i in range(42)] + ["current_player", "move_type", "col", "label"]
+    header = [f"cell_{i}" for i in range(42)] + [
+        "current_player",
+        "move_type",
+        "col",
+        "label",
+    ]
 
     total_samples = 0
     # Use self-play (same class vs same class) to generate dataset from
@@ -152,52 +157,53 @@ def generate_dataset(
     print(f"\nDataset generated: {total_samples} samples from {num_games} games")
     print(f"Saved to: {output_path}")
 
+
 def load_iris(filepath: str) -> tuple:
-        """
-        Load the Iris CSV dataset.
+    """
+    Load the Iris CSV dataset.
 
-        Expected columns (in order):
-          sepal_length, sepal_width, petal_length, petal_width, class
+    Expected columns (in order):
+      sepal_length, sepal_width, petal_length, petal_width, class
 
-        Returns
-        -------
-        X : list of lists (float values)
-        y : list of str (class labels)
-        feature_names : list of str
-        """
-        X, y = [], []
-        feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+    Returns
+    -------
+    X : list of lists (float values)
+    y : list of str (class labels)
+    feature_names : list of str
+    """
+    X, y = [], []
+    feature_names = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
 
-        with open(filepath, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith('#'):
+    with open(filepath, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            if len(parts) < 5:
+                continue
+
+            # Handle files that include an index column (6 cols: idx, sepal, sw, pl, pw, class)
+            if len(parts) >= 6:
+                # try parse columns 1..4 as floats and last as label
+                try:
+                    values = [float(p) for p in parts[1:5]]
+                    label = parts[5]
+                except ValueError:
+                    # skip header/malformed
                     continue
-                parts = [p.strip() for p in line.split(',')]
-                if len(parts) < 5:
+            else:
+                # standard format: sepal_length,sepal_width,petal_length,petal_width,class
+                try:
+                    values = [float(p) for p in parts[:4]]
+                    label = parts[4]
+                except ValueError:
                     continue
 
-                # Handle files that include an index column (6 cols: idx, sepal, sw, pl, pw, class)
-                if len(parts) >= 6:
-                    # try parse columns 1..4 as floats and last as label
-                    try:
-                        values = [float(p) for p in parts[1:5]]
-                        label = parts[5]
-                    except ValueError:
-                        # skip header/malformed
-                        continue
-                else:
-                    # standard format: sepal_length,sepal_width,petal_length,petal_width,class
-                    try:
-                        values = [float(p) for p in parts[:4]]
-                        label = parts[4]
-                    except ValueError:
-                        continue
+            X.append(values)
+            y.append(label)
 
-                X.append(values)
-                y.append(label)
-
-        return X, y, feature_names
+    return X, y, feature_names
 
 
 def load_popout(filepath: str) -> tuple:
@@ -249,7 +255,6 @@ def load_popout(filepath: str) -> tuple:
             label = None
             if "label" in cols and row.get("label"):
                 label = row.get("label")
-
 
             if label is None:
                 continue
