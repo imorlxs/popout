@@ -13,7 +13,7 @@ class DecisionTreeNode:
     nodes.
     """
 
-    def __init__(self, attribute=None, threshold=None, label=None):
+    def __init__(self, attribute=None, threshold=None, label=None, majority_label=None):
         """
         Parameters
         ----------
@@ -28,6 +28,7 @@ class DecisionTreeNode:
         self.attribute = attribute
         self.threshold = threshold
         self.label = label
+        self.majority_label = majority_label
         self.children = {}  # {attribute_value: DecisionTreeNode}
 
     @property
