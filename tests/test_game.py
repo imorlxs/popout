@@ -150,20 +150,13 @@ class TestGamePlay:
 
         moves = iter(
             [
-                "drop",
-                "0",  # P1
-                "drop",
-                "0",  # P2
-                "drop",
-                "1",  # P1
-                "drop",
-                "1",  # P2
-                "drop",
-                "2",  # P1
-                "drop",
-                "2",  # P2
-                "drop",
-                "3",  # P1 wins
+                "d0",  # P1
+                "d0",  # P2
+                "d1",  # P1
+                "d1",  # P2
+                "d2",  # P1
+                "d2",  # P2
+                "d3",  # P1 wins
             ]
         )
         monkeypatch.setattr("builtins.input", lambda _: next(moves))
@@ -186,22 +179,14 @@ class TestGamePlay:
         # loop iteration after the 8th move is recorded.
         moves = iter(
             [
-                "drop",
-                "0",  # P1: col0 has P1 at bottom
-                "drop",
-                "0",  # P2: col0 has P1 at bottom, P2 above
-                "pop",
-                "0",  # P1: removes P1 from bottom; col0 has P2 at bottom
-                "pop",
-                "0",  # P2: removes P2; col0 empty again (2nd occurrence)
-                "drop",
-                "0",  # P1: col0 has P1 at bottom
-                "drop",
-                "0",  # P2: col0 has P1 at bottom, P2 above
-                "pop",
-                "0",  # P1: col0 has P2 at bottom
-                "pop",
-                "0",  # P2: col0 empty again (3rd occurrence -> draw)
+                "d0",  # P1: col0 has P1 at bottom
+                "d0",  # P2: col0 has P1 at bottom, P2 above
+                "p0",  # P1: removes P1 from bottom; col0 has P2 at bottom
+                "p0",  # P2: removes P2; col0 empty again (2nd occurrence)
+                "d0",  # P1: col0 has P1 at bottom
+                "d0",  # P2: col0 has P1 at bottom, P2 above
+                "p0",  # P1: col0 has P2 at bottom
+                "p0",  # P2: col0 empty again (3rd occurrence -> draw)
             ]
         )
         monkeypatch.setattr("builtins.input", lambda _: next(moves))
